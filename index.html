@@ -955,15 +955,24 @@ async function confirmResult(mid) {
     const players = snap.val();
     const updates = {};
 
+    const matchObj = MATCHES.find(m => m.id === mid);
+
     Object.entries(players).forEach(([key, player]) => {
       const bets = player.bets || {};
       const bet = bets[mid];
-      if (!bet || !bet.r) return;
+      if (!bet) return;
       if (bet.scored) return; // כבר חושב
 
-      let pts = 0, correct = 0, exact = 0;
-      // תמיכה בכל הפורמטים
-      const betResult = bet.r || '';
+      // --- נרמל את תוצאת הניחוש ---
+      let effectiveResult = bet.r || '';
+      if (!effectiveResult && bet.result && matchObj) {
+        if (bet.result === matchObj.home) effectiveResult = '1';
+        else if (bet.result === matchObj.away) effectiveResult = '2';
+        else if (bet.result === 'תיקו') effectiveResult = 'X';
+      }
+      if (!effectiveResult) return; // אין ניחוש בכלל
+
+      // --- נרמל את תוצאת הגולים ---
       let betH = 0, betA = 0;
       if (bet.sh !== undefined && bet.sh !== '' && bet.sh !== null) {
         betH = parseInt(bet.sh) || 0;
@@ -973,16 +982,8 @@ async function confirmResult(mid) {
         betH = parseInt(parts[0]) || 0;
         betA = parseInt(parts[1]) || 0;
       }
-      // אם result קריא ואין r — נסה להסיק
-      let effectiveResult = betResult;
-      if (!effectiveResult && bet.result) {
-        const match2 = MATCHES.find(m => m.id === mid);
-        if (match2) {
-          if (bet.result === match2.home) effectiveResult = '1';
-          else if (bet.result === match2.away) effectiveResult = '2';
-          else effectiveResult = 'X';
-        }
-      }
+
+      let pts = 0, correct = 0, exact = 0;
 
       if (effectiveResult === realResult) {
         correct = 1;
