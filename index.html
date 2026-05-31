@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏆 מונדיאל 2026 - ליגת החברה</title>
+<title>🏆 מונדיאל 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
 <!-- ====================================================
@@ -226,15 +226,16 @@ code{background:var(--card2);border:1px solid var(--border);border-radius:4px;pa
       <div class="logo-icon">🏆</div>
       <div class="logo-text">
         <h1>מונדיאל 2026</h1>
-        <p>ליגת הניחושים של החברה</p>
+        <p>ליגת החברה</p>
       </div>
     </div>
     <div class="header-right">
-      <div class="badge" onclick="openNameModal()">👤 <span id="hName">טוען...</span></div>
+      <div class="badge">👤 <span id="hName">טוען...</span></div>
       <div class="badge">⭐ <span id="hPts">0</span> נק'</div>
       <div class="badge" id="syncBadge" title="סטטוס חיבור">
         <span class="sync-dot off" id="syncDot"></span>
       </div>
+      <div class="badge" onclick="logout()" title="התנתק" style="cursor:pointer;color:#ff6b6b">🚪</div>
     </div>
   </div>
 </div>
@@ -866,6 +867,23 @@ function showToast(msg, err) {
 }
 
 document.getElementById('nameInput').addEventListener('keydown', e => { if (e.key==='Enter') joinGame(); });
+
+function logout() {
+  if (!confirm('להתנתק מהליגה?')) return;
+  localStorage.removeItem('wc26_name');
+  localStorage.removeItem('wc26_key');
+  localStorage.removeItem('wc26_bets');
+  userName = '';
+  userKey = '';
+  myBets = {};
+  mySpecial = {};
+  document.getElementById('hName').textContent = 'אורח';
+  document.getElementById('hPts').textContent = '0';
+  document.getElementById('betCount').textContent = '0';
+  document.getElementById('nameModal').style.display = 'flex';
+  document.getElementById('nameInput').value = '';
+  showToast('התנתקת בהצלחה 👋');
+}
 </script>
 </body>
 </html>
