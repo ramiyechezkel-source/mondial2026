@@ -933,6 +933,31 @@ function buildAdminMatches() {
       </div>
     </div>`;
   }).join('');
+  // טעון תוצאות קיימות
+  loadExistingResults();
+}
+
+async function loadExistingResults() {
+  if (!fbReady) return;
+  const {db, ref, get} = fb();
+  try {
+    const snap = await get(ref(db, 'results'));
+    if (!snap.exists()) return;
+    const results = snap.val();
+    Object.entries(results).forEach(([mid, res]) => {
+      const ah = document.getElementById('ah_' + mid);
+      const aa = document.getElementById('aa_' + mid);
+      const btn = document.getElementById('abtn_' + mid);
+      if (ah && res.h !== undefined) {
+        ah.value = res.h;
+        aa.value = res.a;
+        if (btn) {
+          btn.textContent = '✓ עודכן';
+          btn.classList.add('done');
+        }
+      }
+    });
+  } catch(e) { console.log('loadResults err', e); }
 }
 
 async function confirmResult(mid) {
@@ -1025,7 +1050,7 @@ function showPage(id, btn) {
   document.getElementById('page-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
   if (id==='lb') renderLeaderboard();
-  if (id==='admin') setTimeout(autoUpdateResults, 500);
+  if (id==='admin') { setTimeout(autoUpdateResults, 500); setTimeout(loadExistingResults, 300); }
 }
 
 function showToast(msg, err) {
