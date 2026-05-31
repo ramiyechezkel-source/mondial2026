@@ -531,10 +531,9 @@ async function doAuth() {
         return;
       }
       // hash-like: store pass as simple hash
-      const passHash = btoa(encodeURIComponent(pass));
       await set(ref(db, 'players/' + key + '/info'), {
         name: name, pts: 0, correct: 0, exact: 0,
-        joined: Date.now(), pass: passHash
+        joined: Date.now(), pass: pass
       });
       loginSuccess(name, key);
 
@@ -546,8 +545,7 @@ async function doAuth() {
         return;
       }
       const info = snap.val();
-      const passHash = btoa(encodeURIComponent(pass));
-      if (info.pass !== passHash) {
+      if (info.pass !== pass) {
         errEl.textContent = '❌ סיסמה שגויה';
         document.getElementById('authBtn').textContent = 'כניסה 🚀';
         return;
