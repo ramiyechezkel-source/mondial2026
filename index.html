@@ -517,7 +517,7 @@ function joinGame() {
   const v = document.getElementById('nameInput').value.trim();
   if (!v) { document.getElementById('nameInput').focus(); return; }
   userName = v;
-  userKey = safeKey(v) + '_' + Date.now().toString(36).slice(-4);
+  userKey = safeKey(v);
   localStorage.setItem('wc26_name', userName);
   localStorage.setItem('wc26_key', userKey);
   document.getElementById('hName').textContent = userName;
