@@ -946,11 +946,20 @@ async function confirmResult(mid) {
       const bets = player.bets || {};
       const bet = bets[mid];
       if (!bet || !bet.r) return;
+      if (bet.scored) return; // כבר חושב
 
       let pts = 0, correct = 0, exact = 0;
       const betResult = bet.r;
-      const betH = parseInt(bet.sh)||0;
-      const betA = parseInt(bet.sa)||0;
+      // תמיכה בשני פורמטים: sh/sa נפרד או score כמחרוזת "2:0"
+      let betH = 0, betA = 0;
+      if (bet.sh !== undefined && bet.sh !== '') {
+        betH = parseInt(bet.sh) || 0;
+        betA = parseInt(bet.sa) || 0;
+      } else if (bet.score && bet.score.includes(':')) {
+        const parts = bet.score.split(':');
+        betH = parseInt(parts[0]) || 0;
+        betA = parseInt(parts[1]) || 0;
+      }
 
       if (betResult === realResult) {
         correct = 1;
