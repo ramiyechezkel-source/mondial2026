@@ -186,14 +186,22 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 </head>
 <body>
 
-<div class="modal-ov" id="nameModal">
+<div class="modal-ov" id="authModal">
   <div class="modal-box">
     <div style="font-size:46px;margin-bottom:10px">🏆</div>
     <h2>מונדיאל 2026</h2>
-    <p>הכנס את שמך להצטרפות לליגת החברה</p>
-    <input class="modal-inp" id="nameInput" placeholder="שמך כאן..." maxlength="20" autocomplete="off">
-    <button class="btn-primary" onclick="joinGame()">כניסה למשחק 🚀</button>
-    <p style="font-size:11px;color:var(--muted);margin-top:12px">השם ישמש כמזהה שלך בטבלה</p>
+    <p style="margin-bottom:18px">ליגת הניחושים של החברה</p>
+
+    <!-- TABS -->
+    <div style="display:flex;gap:0;margin-bottom:18px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <button id="tabLogin" onclick="switchTab('login')" style="flex:1;padding:9px;font-size:14px;font-weight:700;font-family:'Heebo',sans-serif;background:var(--gold);color:var(--darker);border:none;cursor:pointer">כניסה</button>
+      <button id="tabRegister" onclick="switchTab('register')" style="flex:1;padding:9px;font-size:14px;font-weight:500;font-family:'Heebo',sans-serif;background:var(--card2);color:var(--muted);border:none;cursor:pointer">הרשמה</button>
+    </div>
+
+    <input class="modal-inp" id="authName" placeholder="שם משתמש..." maxlength="20" autocomplete="off">
+    <input class="modal-inp" type="password" id="authPass" placeholder="סיסמה..." maxlength="30" autocomplete="off" style="margin-top:8px">
+    <div id="authError" style="color:#ff6b6b;font-size:13px;min-height:20px;margin-bottom:8px"></div>
+    <button class="btn-primary" id="authBtn" onclick="doAuth()">כניסה 🚀</button>
   </div>
 </div>
 
@@ -472,31 +480,94 @@ window.onload = () => {
   buildChamps();
   buildScorers();
   buildAdminMatches();
-  if (!userName) {
-    document.getElementById('nameModal').style.display = 'flex';
-  } else {
-    document.getElementById('hName').textContent = userName;
-    document.getElementById('nameModal').style.display = 'none';
-    if (fbReady) loadMyData();
-  }
+  // תמיד מציג מסך הזדהות
+  document.getElementById('authModal').style.display = 'flex';
+  // נקה localStorage כי צריך להזדהות מחדש
+  localStorage.removeItem('wc26_name');
+  localStorage.removeItem('wc26_key');
+  userName = '';
+  userKey = '';
   // update lock status every minute
   setInterval(buildMatches, 60000);
 };
 
-function joinGame() {
-  const v = document.getElementById('nameInput').value.trim();
-  if (!v) { document.getElementById('nameInput').focus(); return; }
-  userName = v;
-  userKey = safeKey(v);
+let authMode = 'login'; // 'login' or 'register'
+
+function switchTab(mode) {
+  authMode = mode;
+  const isLogin = mode === 'login';
+  document.getElementById('tabLogin').style.background = isLogin ? 'var(--gold)' : 'var(--card2)';
+  document.getElementById('tabLogin').style.color = isLogin ? 'var(--darker)' : 'var(--muted)';
+  document.getElementById('tabLogin').style.fontWeight = isLogin ? '700' : '500';
+  document.getElementById('tabRegister').style.background = !isLogin ? 'var(--gold)' : 'var(--card2)';
+  document.getElementById('tabRegister').style.color = !isLogin ? 'var(--darker)' : 'var(--muted)';
+  document.getElementById('tabRegister').style.fontWeight = !isLogin ? '700' : '500';
+  document.getElementById('authBtn').textContent = isLogin ? 'כניסה 🚀' : 'הרשמה 🎉';
+  document.getElementById('authError').textContent = '';
+}
+
+async function doAuth() {
+  const name = document.getElementById('authName').value.trim();
+  const pass = document.getElementById('authPass').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+
+  if (!name) { errEl.textContent = '⚠️ הכנס שם משתמש'; return; }
+  if (pass.length < 3) { errEl.textContent = '⚠️ סיסמה חייבת להיות לפחות 3 תווים'; return; }
+  if (!fbReady) { errEl.textContent = '⚠️ אין חיבור לענן, נסה שוב'; return; }
+
+  const key = safeKey(name);
+  const {db, ref, get, set} = fb();
+
+  document.getElementById('authBtn').textContent = '⏳ בודק...';
+
+  try {
+    const snap = await get(ref(db, 'players/' + key + '/info'));
+
+    if (authMode === 'register') {
+      if (snap.exists()) {
+        errEl.textContent = '❌ שם המשתמש "' + name + '" כבר תפוס — בחר שם אחר';
+        document.getElementById('authBtn').textContent = 'הרשמה 🎉';
+        return;
+      }
+      // hash-like: store pass as simple hash
+      const passHash = btoa(encodeURIComponent(pass));
+      await set(ref(db, 'players/' + key + '/info'), {
+        name: name, pts: 0, correct: 0, exact: 0,
+        joined: Date.now(), pass: passHash
+      });
+      loginSuccess(name, key);
+
+    } else {
+      // login
+      if (!snap.exists()) {
+        errEl.textContent = '❌ משתמש לא נמצא — הירשם קודם';
+        document.getElementById('authBtn').textContent = 'כניסה 🚀';
+        return;
+      }
+      const info = snap.val();
+      const passHash = btoa(encodeURIComponent(pass));
+      if (info.pass !== passHash) {
+        errEl.textContent = '❌ סיסמה שגויה';
+        document.getElementById('authBtn').textContent = 'כניסה 🚀';
+        return;
+      }
+      loginSuccess(name, key);
+    }
+  } catch(e) {
+    errEl.textContent = '❌ שגיאה: ' + e.message;
+    document.getElementById('authBtn').textContent = authMode === 'login' ? 'כניסה 🚀' : 'הרשמה 🎉';
+  }
+}
+
+function loginSuccess(name, key) {
+  userName = name;
+  userKey = key;
   localStorage.setItem('wc26_name', userName);
   localStorage.setItem('wc26_key', userKey);
   document.getElementById('hName').textContent = userName;
-  document.getElementById('nameModal').style.display = 'none';
-  if (fbReady) {
-    const {db,ref,set} = fb();
-    set(ref(db,'players/'+userKey+'/info'), {name:userName,pts:0,correct:0,exact:0,joined:Date.now()});
-    loadMyData(); listenLeaderboard(); updatePlayerCount();
-  }
+  document.getElementById('authModal').style.display = 'none';
+  loadMyData(); listenLeaderboard(); updatePlayerCount();
   showToast('ברוך הבא ' + userName + '! 🎉');
 }
 
@@ -507,8 +578,10 @@ function logout() {
   document.getElementById('hName').textContent='אורח';
   document.getElementById('hPts').textContent='0';
   document.getElementById('betCount').textContent='0';
-  document.getElementById('nameModal').style.display='flex';
-  document.getElementById('nameInput').value='';
+  document.getElementById('authName').value='';
+  document.getElementById('authPass').value='';
+  document.getElementById('authError').textContent='';
+  document.getElementById('authModal').style.display='flex';
   showToast('התנתקת בהצלחה 👋');
 }
 
@@ -931,7 +1004,8 @@ function showToast(msg, err) {
   setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') joinGame(); });
+document.getElementById('authPass').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+document.getElementById('authName').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('authPass').focus(); });
 
 // ---- SPORTS TICKER (TheSportsDB key 123) ----
 async function loadTicker() {
