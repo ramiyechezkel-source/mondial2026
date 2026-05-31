@@ -563,7 +563,7 @@ async function saveBetToCloud(mid) {
       group: 'בית ' + match.g,
       kickoff: toIsraelTime(match.kickoffUTC),
       result: resultLabel,
-      score: (bet.sh||'?') + ':' + (bet.sa||'?'),
+      score: (bet.sh||'0') + ':' + (bet.sa||'0'),
       ts: Date.now()
     });
     updateBetCount();
@@ -745,6 +745,81 @@ function updateBetCount() {
   document.getElementById('betCount').textContent = Object.values(myBets).filter(b=>b.r).length;
 }
 
+// ---- ENGLISH TEAM MAP (API → our match IDs) ----
+const EN_TEAMS = {
+  'Mexico':'מקסיקו','South Africa':'דרום אפריקה','South Korea':'דרום קוריאה',
+  'Czech Republic':"צ'כיה",'Czechia':"צ'כיה",'Canada':'קנדה',
+  'Bosnia and Herzegovina':'בוסניה והרצגובינה','Qatar':'קטאר','Switzerland':'שוויץ',
+  'Brazil':'ברזיל','Morocco':'מרוקו','Haiti':'האיטי','Scotland':'סקוטלנד',
+  'United States':'ארה"ב','USA':'ארה"ב','Paraguay':'פראגוואי',
+  'Australia':'אוסטרליה','Turkey':'טורקיה','Turkiye':'טורקיה',
+  'Germany':'גרמניה','Curacao':'קוראסאו','Curaçao':'קוראסאו',
+  'Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור','Netherlands':'הולנד',
+  'Japan':'יפן','Sweden':'שוודיה','Tunisia':'תוניסיה','Belgium':'בלגיה',
+  'Egypt':'מצרים','Iran':'איראן','New Zealand':'ניו זילנד','Spain':'ספרד',
+  'Cape Verde':'קייפ ורדה','Saudi Arabia':'ערב הסעודית','Uruguay':'אורוגוואי',
+  'France':'צרפת','Senegal':'סנגל','Iraq':'עיראק','Norway':'נורווגיה',
+  'Argentina':'ארגנטינה','Algeria':"אלג'יריה",'Austria':'אוסטריה','Jordan':'ירדן',
+  'Portugal':'פורטוגל','DR Congo':'קונגו','Congo':'קונגו','Uzbekistan':'אוזבקיסטן',
+  'Colombia':'קולומביה','England':'אנגליה','Croatia':'קרואטיה',
+  'Ghana':'גאנה','Panama':'פנמה'
+};
+
+function findMatch(homeEn, awayEn, dateStr) {
+  const homeHe = EN_TEAMS[homeEn];
+  const awayHe = EN_TEAMS[awayEn];
+  if (!homeHe || !awayHe) return null;
+  // dateStr from API e.g. "2026-06-11"
+  return MATCHES.find(m => {
+    if (m.home !== homeHe || m.away !== awayHe) return false;
+    // check date matches kickoffUTC
+    const kickDate = m.kickoffUTC.slice(0,10); // "2026-06-11"
+    // also check next day (for matches after midnight UTC)
+    const d = new Date(m.kickoffUTC);
+    const ilDate = new Date(d.getTime() + 3*3600000);
+    const ilStr = ilDate.toISOString().slice(0,10);
+    return kickDate === dateStr || ilStr === dateStr;
+  });
+}
+
+async function autoUpdateResults() {
+  if (!fbReady) return;
+  try {
+    const today = new Date();
+    const yyyy = today.getUTCFullYear();
+    const mm = String(today.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(today.getUTCDate()).padStart(2,'0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    // also check yesterday
+    const yd = new Date(today.getTime() - 86400000);
+    const ystr = `${yd.getUTCFullYear()}-${String(yd.getUTCMonth()+1).padStart(2,'0')}-${String(yd.getUTCDate()).padStart(2,'0')}`;
+
+    for (const d of [dateStr, ystr]) {
+      const res = await fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${d}`);
+      const data = await res.json();
+      const events = data.events || [];
+      for (const e of events) {
+        if (e.strStatus !== 'Match Finished') continue;
+        if (e.intHomeScore === null || e.intAwayScore === null) continue;
+        const match = findMatch(e.strHomeTeam, e.strAwayTeam, d);
+        if (!match) continue;
+        // check if already scored
+        const {db, ref, get} = fb();
+        const snap = await get(ref(db, 'results/' + match.id));
+        if (snap.exists()) continue; // already processed
+        // auto-fill admin inputs if on admin page
+        const ah = document.getElementById('ah_' + match.id);
+        const aa = document.getElementById('aa_' + match.id);
+        if (ah && aa) {
+          ah.value = e.intHomeScore;
+          aa.value = e.intAwayScore;
+          showToast('🔄 תוצאה נמצאה: ' + match.home + ' ' + e.intHomeScore + ':' + e.intAwayScore + ' ' + match.away);
+        }
+      }
+    }
+  } catch(e) { console.log('autoUpdate err', e); }
+}
+
 // ---- ADMIN ----
 function checkAdminPass() {
   const v = document.getElementById('adminPassInput').value;
@@ -785,7 +860,7 @@ async function confirmResult(mid) {
   const realDiff = Math.abs(hGoals - aGoals);
 
   if (!fbReady) { showToast('❌ אין חיבור', true); return; }
-  const {db,ref,get,update} = fb();
+  const {db,ref,get,update,set} = fb();
 
   const btn = document.getElementById('abtn_'+mid);
   btn.textContent = '⏳ מחשב...';
@@ -829,6 +904,8 @@ async function confirmResult(mid) {
     });
 
     await update(ref(db,'/'), updates);
+    // שמור תוצאה ב-DB כדי לא לעבד שוב
+    await set(ref(db,'results/'+mid), {h:hGoals, a:aGoals, ts:Date.now()});
     btn.textContent = '✓ עודכן!';
     btn.classList.add('done');
     showToast('✅ תוצאה עודכנה — נקודות חושבו לכולם!');
@@ -844,6 +921,7 @@ function showPage(id, btn) {
   document.getElementById('page-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
   if (id==='lb') renderLeaderboard();
+  if (id==='admin') setTimeout(autoUpdateResults, 500);
 }
 
 function showToast(msg, err) {
@@ -855,66 +933,60 @@ function showToast(msg, err) {
 
 document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') joinGame(); });
 
-// ---- SPORTS TICKER (TheSportsDB) ----
+// ---- SPORTS TICKER (TheSportsDB key 123) ----
 async function loadTicker() {
   const track = document.getElementById('tickerTrack');
   if (!track) return;
   try {
-    // Get yesterday + today events from Soccer (idSport=1) - World Cup (idLeague=4328)
     const today = new Date();
     const yyyy = today.getUTCFullYear();
     const mm = String(today.getUTCMonth()+1).padStart(2,'0');
     const dd = String(today.getUTCDate()).padStart(2,'0');
     const dateStr = `${yyyy}-${mm}-${dd}`;
 
-    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/1/eventsday.php?d=${dateStr}&s=Soccer`);
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${dateStr}`);
     const data = await res.json();
-    const events = (data.events || []).slice(0, 20);
+    let events = data.events || [];
 
+    // אם אין היום — נסה אתמול
     if (!events.length) {
-      // try yesterday
       const yd = new Date(today.getTime() - 86400000);
       const ystr = `${yd.getUTCFullYear()}-${String(yd.getUTCMonth()+1).padStart(2,'0')}-${String(yd.getUTCDate()).padStart(2,'0')}`;
-      const res2 = await fetch(`https://www.thesportsdb.com/api/v1/json/1/eventsday.php?d=${ystr}&s=Soccer`);
+      const res2 = await fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${ystr}`);
       const data2 = await res2.json();
-      const ev2 = (data2.events || []).slice(0, 20);
-      if (ev2.length) renderTicker(ev2);
-      else track.innerHTML = '<div class="titem">⚽ לא נמצאו משחקים היום</div>';
+      events = data2.events || [];
+    }
+
+    if (!events.length) {
+      track.innerHTML = '<div class="titem">⚽ מונדיאל 2026 מתחיל 11.6!</div><div class="titem">🏆 48 נבחרות, 104 משחקים — נחש עכשיו!</div>';
       return;
     }
-    renderTicker(events);
+
+    const items = events.slice(0,20).map(e => {
+      const home = e.strHomeTeam || '';
+      const away = e.strAwayTeam || '';
+      const hs = e.intHomeScore;
+      const as = e.intAwayScore;
+      const isFin = e.strStatus === 'Match Finished';
+      const isLive = !isFin && e.strProgress && e.strProgress !== '';
+      let score = (hs !== null && hs !== undefined && as !== null && as !== undefined)
+        ? `<span class="tscore">${hs}:${as}</span>`
+        : '<span style="color:var(--muted)">נגד</span>';
+      const liveTag = isLive ? '<span class="tlive">● חי</span>' : '';
+      const league = e.strLeague ? `<span style="color:var(--muted);font-size:11px">[${e.strLeague}]</span>` : '';
+      return `<div class="titem">${league} ${home} ${score} ${away} ${liveTag}</div>`;
+    });
+
+    track.innerHTML = items.join('') + items.join('');
+    const dur = Math.max(30, items.length * 5);
+    track.style.animationDuration = dur + 's';
   } catch(e) {
-    track.innerHTML = '<div class="titem">⚽ מונדיאל 2026 — 48 נבחרות, 104 משחקים, מתחיל 11.6</div>';
+    track.innerHTML = '<div class="titem">⚽ מונדיאל 2026 — 11.6 קיק אוף!</div>';
   }
 }
 
-function renderTicker(events) {
-  const track = document.getElementById('tickerTrack');
-  const items = events.map(e => {
-    const home = e.strHomeTeam || '';
-    const away = e.strAwayTeam || '';
-    const hs = e.intHomeScore;
-    const as = e.intAwayScore;
-    const isLive = e.strStatus === 'Match Finished' ? false : (e.strProgress && e.strProgress !== '');
-    const isFin = e.strStatus === 'Match Finished';
-    let score = '';
-    if (hs !== null && as !== null) score = `<span class="tscore">${hs}:${as}</span>`;
-    else score = '<span style="color:var(--muted)">נגד</span>';
-    const liveTag = isLive ? '<span class="tlive">● חי</span>' : '';
-    const league = e.strLeague ? `<span style="color:var(--muted);font-size:11px">[${e.strLeague}]</span>` : '';
-    return `<div class="titem">${league} ${home} ${score} ${away} ${liveTag}</div>`;
-  });
-  // duplicate for seamless loop
-  const html = items.join('') + items.join('');
-  track.innerHTML = html;
-  // adjust animation speed based on content length
-  const totalItems = items.length * 2;
-  const duration = Math.max(30, totalItems * 4);
-  track.style.animationDuration = duration + 's';
-}
-
 loadTicker();
-setInterval(loadTicker, 5 * 60 * 1000); // refresh every 5 min
+setInterval(loadTicker, 60 * 60 * 1000); // כל שעה = 24 בקשות ביום
 document.getElementById('adminPassInput').addEventListener('keydown', e => { if(e.key==='Enter') checkAdminPass(); });
 </script>
 </body>
