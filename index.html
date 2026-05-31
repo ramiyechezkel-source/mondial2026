@@ -633,7 +633,10 @@ async function saveBetToCloud(mid) {
       match: match.home + ' נגד ' + match.away,
       group: 'בית ' + match.g,
       kickoff: toIsraelTime(match.kickoffUTC),
+      r: bet.r,
       result: resultLabel,
+      sh: bet.sh||'0',
+      sa: bet.sa||'0',
       score: (bet.sh||'0') + ':' + (bet.sa||'0'),
       ts: Date.now()
     });
@@ -663,8 +666,18 @@ function buildMatches() {
     const bet = myBets[m.id] || {};
     const hf = TEAMS[m.home]||'🏳', af = TEAMS[m.away]||'🏳';
     const locked = isLocked(m);
-    const hSel = bet.r==='1'?'sel':'', dSel = bet.r==='X'?'sel':'', aSel = bet.r==='2'?'sel':'';
-    const sh = bet.sh||'', sa = bet.sa||'';
+    // תמיכה בפורמט ישן וחדש
+    let betR = bet.r || '';
+    if (!betR && bet.result && m) {
+      if (bet.result === m.home) betR = '1';
+      else if (bet.result === m.away) betR = '2';
+      else if (bet.result === 'תיקו') betR = 'X';
+    }
+    const hSel = betR==='1'?'sel':'', dSel = betR==='X'?'sel':'', aSel = betR==='2'?'sel':'';
+    let sh = bet.sh||'', sa = bet.sa||'';
+    if ((!sh && !sa) && bet.score && bet.score.includes(':')) {
+      const p = bet.score.split(':'); sh = p[0]; sa = p[1];
+    }
     const dis = locked ? 'disabled' : '';
     const ilTime = toIsraelTime(m.kickoffUTC);
     return `
@@ -949,10 +962,10 @@ async function confirmResult(mid) {
       if (bet.scored) return; // כבר חושב
 
       let pts = 0, correct = 0, exact = 0;
-      const betResult = bet.r;
-      // תמיכה בשני פורמטים: sh/sa נפרד או score כמחרוזת "2:0"
+      // תמיכה בכל הפורמטים
+      const betResult = bet.r || '';
       let betH = 0, betA = 0;
-      if (bet.sh !== undefined && bet.sh !== '') {
+      if (bet.sh !== undefined && bet.sh !== '' && bet.sh !== null) {
         betH = parseInt(bet.sh) || 0;
         betA = parseInt(bet.sa) || 0;
       } else if (bet.score && bet.score.includes(':')) {
@@ -960,8 +973,18 @@ async function confirmResult(mid) {
         betH = parseInt(parts[0]) || 0;
         betA = parseInt(parts[1]) || 0;
       }
+      // אם result קריא ואין r — נסה להסיק
+      let effectiveResult = betResult;
+      if (!effectiveResult && bet.result) {
+        const match2 = MATCHES.find(m => m.id === mid);
+        if (match2) {
+          if (bet.result === match2.home) effectiveResult = '1';
+          else if (bet.result === match2.away) effectiveResult = '2';
+          else effectiveResult = 'X';
+        }
+      }
 
-      if (betResult === realResult) {
+      if (effectiveResult === realResult) {
         correct = 1;
         const betDiff = Math.abs(betH - betA);
         if (betH === hGoals && betA === aGoals) {
