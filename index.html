@@ -795,6 +795,82 @@ function listenLeaderboard() {
   });
 }
 
+async function recalcAllScores() {
+  if (!fbReady) return;
+  const {db,ref,get,update} = fb();
+  try {
+    // קבל את כל התוצאות שהמנהל עדכן
+    const resSnap = await get(ref(db,'results'));
+    if (!resSnap.exists()) return;
+    const results = resSnap.val();
+
+    // קבל את כל השחקנים
+    const playSnap = await get(ref(db,'players'));
+    if (!playSnap.exists()) return;
+    const players = playSnap.val();
+
+    const updates = {};
+
+    // לכל שחקן — חשב מחדש את הניקוד הכולל
+    Object.entries(players).forEach(([key, player]) => {
+      const bets = player.bets || {};
+      let totalPts = 0, totalCorrect = 0, totalExact = 0;
+
+      // לכל משחק שיש תוצאה
+      Object.entries(results).forEach(([mid, res]) => {
+        const bet = bets[mid];
+        if (!bet) return;
+
+        const hGoals = parseInt(res.h) || 0;
+        const aGoals = parseInt(res.a) || 0;
+        const realResult = hGoals > aGoals ? '1' : hGoals < aGoals ? '2' : 'X';
+        const realDiff = Math.abs(hGoals - aGoals);
+
+        // נרמל ניחוש
+        let effectiveResult = bet.r || '';
+        if (!effectiveResult && bet.result) {
+          const matchObj = MATCHES.find(m => m.id === mid);
+          if (matchObj) {
+            if (bet.result === matchObj.home) effectiveResult = '1';
+            else if (bet.result === matchObj.away) effectiveResult = '2';
+            else if (bet.result === 'תיקו') effectiveResult = 'X';
+          }
+        }
+        if (!effectiveResult) return;
+
+        // נרמל תוצאה מדויקת
+        let betH = 0, betA = 0;
+        if (bet.sh !== undefined && bet.sh !== '' && bet.sh !== null) {
+          betH = parseInt(bet.sh) || 0;
+          betA = parseInt(bet.sa) || 0;
+        } else if (bet.score && bet.score.includes(':')) {
+          const parts = bet.score.split(':');
+          betH = parseInt(parts[0]) || 0;
+          betA = parseInt(parts[1]) || 0;
+        }
+
+        if (effectiveResult === realResult) {
+          totalCorrect++;
+          const betDiff = Math.abs(betH - betA);
+          if (betH === hGoals && betA === aGoals) {
+            totalPts += 5; totalExact++;
+          } else if (betDiff === realDiff) {
+            totalPts += 3;
+          } else {
+            totalPts += 1;
+          }
+        }
+      });
+
+      updates['players/'+key+'/info/pts'] = totalPts;
+      updates['players/'+key+'/info/correct'] = totalCorrect;
+      updates['players/'+key+'/info/exact'] = totalExact;
+    });
+
+    await update(ref(db,'/'), updates);
+  } catch(e) { console.log('recalc err', e); }
+}
+
 function renderLeaderboard() {
   const colors = ['#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12','#e91e63'];
   const list = Object.entries(allPlayers).map(([k,v]) => ({
@@ -1049,7 +1125,7 @@ function showPage(id, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (id==='lb') renderLeaderboard();
+  if (id==='lb') { recalcAllScores(); renderLeaderboard(); }
   if (id==='admin') { setTimeout(autoUpdateResults, 500); setTimeout(loadExistingResults, 300); }
 }
 
