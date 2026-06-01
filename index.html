@@ -211,7 +211,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
       <div class="logo-icon">🏆</div>
       <div class="logo-text">
         <h1>מונדיאל 2026</h1>
-        <p>ליגת החברה</p>
+        <p>נס טכנולוגיות</p>
       </div>
     </div>
     <div class="header-right">
@@ -1013,11 +1013,30 @@ function buildAdminMatches() {
   loadExistingResults();
 }
 
-async function loadExistingResults() {
+function loadExistingResults() {
   if (!fbReady) return;
-  const {db, ref, get} = fb();
-  try {
-    const snap = await get(ref(db, 'results'));
+  const {db, ref, onValue} = fb();
+
+  // קודם נאפס את כל השדות
+  MATCHES.forEach(m => {
+    const ah = document.getElementById('ah_' + m.id);
+    const aa = document.getElementById('aa_' + m.id);
+    const btn = document.getElementById('abtn_' + m.id);
+    if (ah) { ah.value = ''; aa.value = ''; }
+    if (btn) { btn.textContent = 'אשר תוצאה ✅'; btn.classList.remove('done'); }
+  });
+
+  // עכשיו טען בזמן אמת מה-DB
+  onValue(ref(db, 'results'), snap => {
+    // איפוס שוב לפני עדכון
+    MATCHES.forEach(m => {
+      const ah = document.getElementById('ah_' + m.id);
+      const aa = document.getElementById('aa_' + m.id);
+      const btn = document.getElementById('abtn_' + m.id);
+      if (ah) { ah.value = ''; aa.value = ''; }
+      if (btn) { btn.textContent = 'אשר תוצאה ✅'; btn.classList.remove('done'); }
+    });
+
     if (!snap.exists()) return;
     const results = snap.val();
     Object.entries(results).forEach(([mid, res]) => {
@@ -1027,13 +1046,10 @@ async function loadExistingResults() {
       if (ah && res.h !== undefined) {
         ah.value = res.h;
         aa.value = res.a;
-        if (btn) {
-          btn.textContent = '✓ עודכן';
-          btn.classList.add('done');
-        }
+        if (btn) { btn.textContent = '✓ עודכן'; btn.classList.add('done'); }
       }
     });
-  } catch(e) { console.log('loadResults err', e); }
+  }, { onlyOnce: false });
 }
 
 async function confirmResult(mid) {
