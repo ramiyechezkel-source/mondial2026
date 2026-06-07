@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
   const firebaseConfig = {
     apiKey: "AIzaSyDgibfq2NT1-93_3Yi3gjdDajDjXHO-1YE",
     authDomain: "mondial2026-8fd06.firebaseapp.com",
@@ -19,7 +19,7 @@
   };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  window._fb = { db, ref, set, get, onValue, update };
+  window._fb = { db, ref, set, get, onValue, update, remove };
   window._fbReady = true;
   document.dispatchEvent(new Event('fbReady'));
 </script>
@@ -73,7 +73,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .bet-lbl{font-size:12px;color:var(--muted);margin-bottom:7px}
 .bet-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
 .bbet{background:var(--card2);border:1.5px solid rgba(255,255,255,.07);color:var(--text);border-radius:8px;padding:9px 5px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Heebo',sans-serif;text-align:center;transition:.15s}
-.bbet:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.bbet:hover:not(:disabled){border-color:var(--gold);color:var(--text);background:rgba(245,166,35,0.12)}
 .bbet.sel{background:var(--gold);color:var(--darker);border-color:var(--gold);font-weight:700}
 .bbet:disabled{cursor:not-allowed;opacity:0.5}
 .bbet .odd{font-size:11px;opacity:.8;display:block;margin-top:2px}
@@ -113,7 +113,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .lb-pts-l{font-size:11px;color:var(--muted)}
 .champ-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:16px}
 .cc{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:13px 9px;text-align:center;cursor:pointer;transition:.15s}
-.cc:hover{border-color:var(--gold);transform:translateY(-2px)}
+.cc:hover{border-color:var(--gold);box-shadow:0 4px 12px rgba(245,166,35,0.2)}
 .cc.sel{border-color:var(--gold);background:rgba(245,166,35,.13)}
 .cc .cf{font-size:28px;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif}.cc .cn{font-size:12px;font-weight:600;margin-top:5px}
 .cc .co{font-size:11px;color:var(--gold);margin-top:3px;background:rgba(245,166,35,.1);border-radius:4px;padding:2px 6px;display:inline-block}
@@ -135,6 +135,13 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .modal-inp:focus{border-color:var(--gold)}
 .btn-primary{background:var(--gold);color:var(--darker);border:none;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif;transition:.2s;width:100%}
 .btn-primary:hover{background:var(--gold-dark)}
+.countdown{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.cd-label{font-size:13px;color:var(--muted)}
+.cd-match{font-size:14px;font-weight:700;color:var(--text)}
+.cd-time{display:flex;gap:10px}
+.cd-unit{text-align:center}
+.cd-num{font-size:22px;font-weight:900;color:var(--gold);line-height:1;display:block}
+.cd-txt{font-size:10px;color:var(--muted)}
 .gtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .gtab{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 12px;font-size:13px;cursor:pointer;font-family:'Heebo',sans-serif;transition:.15s}
 .gtab:hover{border-color:var(--gold)}.gtab.act{background:var(--gold);color:var(--darker);font-weight:700}
@@ -147,6 +154,29 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .grp-table td:first-child{text-align:right;font-weight:600;padding-right:14px;display:flex;align-items:center;gap:8px}
 .grp-table tr:last-child td{border-bottom:none}
 .grp-table tr.qualify{background:rgba(39,174,96,0.08)}
+.lb-row{transition:all 0.4s ease}
+.lb-row.moving-up{animation:slideUp 0.5s ease}
+.lb-row.moving-down{animation:slideDown 0.5s ease}
+@keyframes slideUp{0%{background:rgba(39,174,96,0.3);transform:translateY(4px)}100%{background:transparent;transform:translateY(0)}}
+@keyframes slideDown{0%{background:rgba(192,57,43,0.2);transform:translateY(-4px)}100%{background:transparent;transform:translateY(0)}}
+.notif-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--text);cursor:pointer;font-family:'Heebo',sans-serif;margin-bottom:16px;transition:.2s}
+.notif-btn:hover{border-color:var(--gold)}
+.notif-btn.on{background:rgba(39,174,96,0.15);border-color:#4ade80;color:#4ade80}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:16px}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;background:var(--gold);border-radius:4px 4px 0 0;transition:height 0.5s ease;min-height:2px}
+.chart-label{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;max-width:40px;text-overflow:ellipsis}
+.chart-val{font-size:10px;color:var(--gold);font-weight:700}
+.hist-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hist-match{font-size:14px;font-weight:600;flex:1;min-width:160px}
+.hist-pick{font-size:13px;color:var(--muted)}
+.hist-score{font-size:13px;color:var(--gold);font-weight:700}
+.hist-result{border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700}
+.hist-exact{background:rgba(39,174,96,0.2);color:#4ade80}
+.hist-correct{background:rgba(245,166,35,0.15);color:var(--gold)}
+.hist-wrong{background:rgba(192,57,43,0.15);color:#ff6b6b}
+.hist-pending{background:var(--card2);color:var(--muted)}
 .grp-sync{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(120px);background:#27AE60;color:#fff;padding:11px 22px;border-radius:30px;font-size:14px;font-weight:600;z-index:9999;transition:.3s ease;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -208,6 +238,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
     <button class="tab" onclick="showPage('special',this)">🎯 ניחושים מיוחדים</button>
     <button class="tab" onclick="showPage('lb',this)">🏅 טבלת ניקוד</button>
     <button class="tab" onclick="showPage('admin',this)">🔧 מנהל</button>
+    <button class="tab" onclick="showPage('history',this)">📋 הניחושים שלי</button>
     <button class="tab" onclick="showPage('rules',this)">📋 חוקים</button>
   </div>
 </div>
@@ -220,6 +251,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
       <div class="stat-card"><div class="num" id="betCount">0</div><div class="lbl">מספר ניחושים</div></div>
       <div class="stat-card"><div class="num" id="playerCount">1</div><div class="lbl">משתתפים</div></div>
     </div>
+    <div id="nextMatchBox"></div>
     <div class="gfilter" id="gfilter"></div>
     <div class="matches" id="matchGrid"></div>
   </div>
@@ -241,8 +273,18 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
   </div>
 
   <div class="page" id="page-lb">
-    <div class="sec-title">🏅 טבלת ניקוד בזמן אמת</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+      <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">🔔 הפעל התראות</button>
+    </div>
+    <div class="sec-title" style="justify-content:space-between">
+      <span>🏅 טבלת ניקוד בזמן אמת</span>
+      <button onclick="exportExcel()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">📥 ייצוא Excel</button>
+    </div>
     <div class="lb" id="lbList"><div style="color:var(--muted);text-align:center;padding:40px">⏳ טוען...</div></div>
+    <div class="chart-wrap" id="chartWrap" style="display:none">
+      <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:4px">📈 ניקוד השחקנים</div>
+      <div class="chart-bars" id="chartBars"></div>
+    </div>
   </div>
 
   <div class="page" id="page-admin">
@@ -254,8 +296,37 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
     </div>
     <div id="adminPanel" style="display:none">
       <p style="color:var(--muted);font-size:13px;margin-bottom:16px">הכנס תוצאות משחקים שהסתיימו — המערכת תחשב נקודות אוטומטית לכולם.</p>
+      <div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:14px;font-weight:700;color:#ff6b6b;margin-bottom:8px">⚠️ איפוס מוחלט</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">מוחק את כל התוצאות והנקודות — כולם מתחילים מ-0</p>
+        <button onclick="resetAll()" style="background:#c0392b;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">🗑️ אפס הכל</button>
+      </div>
+
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
+        <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:14px">🏆 קביעת מנצח הטורניר</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+          <select id="champWinner" style="flex:1;background:var(--darker);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Heebo',sans-serif;outline:none">
+            <option value="">-- בחר אלוף --</option>
+          </select>
+          <button onclick="setChampWinner()" style="background:var(--gold);color:var(--darker);border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">קבע אלוף ✅</button>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:10px;margin-top:14px">⚽ קביעת מלך השערים</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <select id="scorerWinner" style="flex:1;background:var(--darker);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Heebo',sans-serif;outline:none">
+            <option value="">-- בחר מלך שערים --</option>
+          </select>
+          <button onclick="setScorerWinner()" style="background:var(--gold);color:var(--darker);border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">קבע מלך שערים ✅</button>
+        </div>
+        <div id="specialStatus" style="font-size:13px;color:#4ade80;margin-top:10px"></div>
+      </div>
+
       <div id="adminMatches"></div>
     </div>
+  </div>
+
+  <div class="page" id="page-history">
+    <div class="sec-title">📋 הניחושים שלי</div>
+    <div id="historyContent"><div style="color:var(--muted);text-align:center;padding:40px">⏳ טוען ניחושים...</div></div>
   </div>
 
   <div class="page" id="page-rules">
@@ -268,9 +339,17 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
       <div class="pts-row"><span>ניחוש שגוי לגמרי</span><span class="pts-badge red">0</span></div>
     </div>
     <div class="pts-card">
-      <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:11px">🎯 ניחושים מיוחדים</div>
-      <div class="pts-row"><span>אלוף מונדיאל</span><span class="pts-badge">20</span></div>
-      <div class="pts-row"><span>מלך השערים</span><span class="pts-badge">15</span></div>
+      <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:11px">🎯 ניחושים מיוחדים — ניקוד דינמי לפי יחסי הימורים</div>
+      <div class="pts-row"><span>אלוף מונדיאל — מועדף (ספרד, צרפת +450 עד +650)</span><span class="pts-badge">40–60</span></div>
+      <div class="pts-row"><span>אלוף מונדיאל — בינוני (הולנד, מרוקו +1400 עד +3000)</span><span class="pts-badge">80</span></div>
+      <div class="pts-row"><span>אלוף מונדיאל — הפתעה (קוראסאו, האיטי +50000+)</span><span class="pts-badge">120–140</span></div>
+      <div class="pts-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:12px"><span>מלך השערים — מועדף (מבאפה, קיין +600–+700)</span><span class="pts-badge">45</span></div>
+      <div class="pts-row"><span>מלך השערים — בינוני (+1400 עד +3000)</span><span class="pts-badge">60</span></div>
+      <div class="pts-row"><span>מלך השערים — הפתעה (+5000+)</span><span class="pts-badge">90–120</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:8px;background:var(--card2);border-radius:6px">
+        💡 ככל שהנבחרת/שחקן פחות מועדפים — כך תקבל יותר נקודות אם תצדק!
+        הנקודות המדויקות מוצגות על כל כרטיס בדף הניחושים המיוחדים.
+      </div>
     </div>
     <div class="pts-card">
       <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:11px">🔒 חוקי ניחושים</div>
@@ -550,10 +629,20 @@ document.addEventListener('fbReady',()=>{
 
 window.onload=()=>{
   buildGroupFilter();buildMatches();buildChamps();buildScorers();buildAdminMatches();
-  document.getElementById('authModal').style.display='flex';
-  localStorage.removeItem('wc26_name');localStorage.removeItem('wc26_key');
-  userName='';userKey='';
   setInterval(buildMatches,60000);
+  const savedName=localStorage.getItem('wc26_name');
+  const savedKey=localStorage.getItem('wc26_key');
+  if(savedName&&savedKey){
+    userName=savedName;userKey=savedKey;
+    document.getElementById('hName').textContent=userName;
+    document.getElementById('authModal').style.display='none';
+    function doLogin(){loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();}
+    if(fbReady){doLogin();}
+    else{document.addEventListener('fbReady',doLogin,{once:true});}
+  }else{
+    document.getElementById('authModal').style.display='flex';
+    userName='';userKey='';
+  }
 };
 
 let authMode='login';
@@ -637,6 +726,26 @@ async function selResult(mid,r,btn){
   if(!userName){showToast('⚠️ התחבר קודם!',true);return;}
   const match=MATCHES.find(m=>m.id===mid);
   if(isLocked(match)){showToast('🔒 הניחוש ננעל!',true);return;}
+  // אם כבר בחרת תוצאה מדויקת — לא ניתן לשנות את המנצח
+  const existing = myBets[mid];
+  if(existing && existing.r && existing.r !== r) {
+    const scoreSet = (existing.sh && existing.sh !== '0') || (existing.sa && existing.sa !== '0');
+    if(scoreSet) {
+      showToast('⚠️ שינוי מנצח ימחק את התוצאה המדויקת. לחץ שוב לאישור', true);
+      // reset score if they insist (second click)
+      if(myBets[mid]._confirmChange) {
+        myBets[mid].sh='0'; myBets[mid].sa='0';
+        const sh=document.getElementById('sh_'+mid);
+        const sa=document.getElementById('sa_'+mid);
+        if(sh)sh.value=''; if(sa)sa.value='';
+        delete myBets[mid]._confirmChange;
+      } else {
+        myBets[mid]._confirmChange = true;
+        return;
+      }
+    }
+  }
+  if(myBets[mid]) delete myBets[mid]._confirmChange;
   if(!myBets[mid])myBets[mid]={};
   myBets[mid].r=r;
   btn.closest('.bet-opts').querySelectorAll('.bbet').forEach(b=>b.classList.remove('sel'));
@@ -650,6 +759,20 @@ async function updScore(mid){
   const sa=document.getElementById('sa_'+mid);
   if(sh)myBets[mid].sh=sh.value;
   if(sa)myBets[mid].sa=sa.value;
+
+  // אם הוזנה תוצאה מדויקת — כפה בחירת מנצח אוטומטית
+  const h=parseInt(sh&&sh.value)||0;
+  const a=parseInt(sa&&sa.value)||0;
+  if(sh&&sa&&sh.value!==''&&sa.value!==''){
+    const autoR = h>a?'1':h<a?'2':'X';
+    myBets[mid].r=autoR;
+    // עדכן כפתורים
+    const opts=document.querySelectorAll('.bbet[data-mid="'+mid+'"]');
+    opts.forEach(btn=>{
+      btn.classList.toggle('sel', btn.dataset.r===autoR);
+    });
+  }
+
   clearTimeout(window['scoreTimer_'+mid]);
   window['scoreTimer_'+mid]=setTimeout(()=>saveBetToCloud(mid),800);
 }
@@ -721,9 +844,9 @@ function buildMatches(){
       <div class="bet-sec">
         <div class="bet-lbl">${locked?'🔒 הניחוש ננעל':'בחר ניחוש — נשמר אוטומטית:'}</div>
         <div class="bet-opts">
-          <button class="bbet ${hSel}" onclick="selResult('${m.id}','1',this)" ${dis}>${m.home} <span style="font-size:10px;opacity:0.7">${ABBREV[m.home]||''}</span><span class="odd">${m.ho}</span></button>
-          <button class="bbet ${dSel}" onclick="selResult('${m.id}','X',this)" ${dis}>תיקו<span class="odd">${m.do}</span></button>
-          <button class="bbet ${aSel}" onclick="selResult('${m.id}','2',this)" ${dis}>${m.away} <span style="font-size:10px;opacity:0.7">${ABBREV[m.away]||''}</span><span class="odd">${m.ao}</span></button>
+          <button class="bbet ${hSel}" data-mid="${m.id}" data-r="1" onclick="selResult('${m.id}','1',this)" ${dis}>${m.home} <span style="font-size:10px;opacity:0.7">${ABBREV[m.home]||''}</span><span class="odd">${m.ho}</span></button>
+          <button class="bbet ${dSel}" data-mid="${m.id}" data-r="X" onclick="selResult('${m.id}','X',this)" ${dis}>תיקו<span class="odd">${m.do}</span></button>
+          <button class="bbet ${aSel}" data-mid="${m.id}" data-r="2" onclick="selResult('${m.id}','2',this)" ${dis}>${m.away} <span style="font-size:10px;opacity:0.7">${ABBREV[m.away]||''}</span><span class="odd">${m.ao}</span></button>
         </div>
       </div>
       <div class="score-row">
@@ -740,27 +863,56 @@ function buildMatches(){
 }
 
 function buildChamps(){
-  document.getElementById('champGrid').innerHTML=CHAMPS.map((c,i)=>
-    `<div class="cc ${mySpecial.champion===i?'sel':''}" onclick="selChamp(${i},this)">
-      <div class="cf">${flagImg(c.n,32)}</div><div class="cn">${c.n}</div><div class="co">${c.o}</div>
-    </div>`
-  ).join('');
+  document.getElementById('champGrid').innerHTML=CHAMPS.map((c,i)=>{
+    const dynPts = oddsToPoints(c.o, 20);
+    return `<div class="cc ${mySpecial.champion===i?'sel':''}" onclick="selChamp(${i},this)">
+      <div class="cf">${flagImg(c.n,32)}</div><div class="cn">${c.n}</div>
+      <div class="co">${c.o}</div>
+      <div style="font-size:10px;color:#4ade80;margin-top:2px">🏆 ${dynPts} נק'</div>
+    </div>`;
+  }).join('');
 }
-function selChamp(i,el){mySpecial.champion=i;document.querySelectorAll('#champGrid .cc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+async function selChamp(i,el){
+  mySpecial.champion=i;
+  document.querySelectorAll('#champGrid .cc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  if(fbReady&&userKey){
+    const {db,ref,update}=fb();
+    try{
+      await update(ref(db,'players/'+userKey+'/special'),{champion:i});
+      showToast('🏆 נשמר: '+CHAMPS[i].n);
+      document.getElementById('saveChampBtn').textContent='✓ נשמר ☁️';
+    }catch(e){showToast('❌ שגיאה',true);}
+  }
+}
 async function saveChampion(){
   if(mySpecial.champion===undefined){showToast('⚠️ בחר נבחרת!',true);return;}
   if(fbReady&&userKey){const {db,ref,update}=fb();try{await update(ref(db,'players/'+userKey+'/special'),{champion:mySpecial.champion});showToast('🏆 נשמר: '+CHAMPS[mySpecial.champion].n);document.getElementById('saveChampBtn').textContent='✓ נשמר ☁️';}catch(e){showToast('❌ שגיאה',true);}}
 }
 
 function buildScorers(){
-  document.getElementById('scorerGrid').innerHTML=SCORERS.map((s,i)=>
-    `<div class="sc ${mySpecial.scorer===i?'sel':''}" onclick="selScorer(${i},this)">
+  document.getElementById('scorerGrid').innerHTML=SCORERS.map((s,i)=>{
+    const dynPts = oddsToPoints(s.o, 15);
+    return `<div class="sc ${mySpecial.scorer===i?'sel':''}" onclick="selScorer(${i},this)">
       <div class="sf">${flagImg(s.t,24)}</div><div class="sn">${s.n}</div>
       <div class="st">${s.t}</div><div class="so">יחס ${s.o}</div>
-    </div>`
-  ).join('');
+      <div style="font-size:10px;color:#4ade80;margin-top:2px">⚽ ${dynPts} נק'</div>
+    </div>`;
+  }).join('');
 }
-function selScorer(i,el){mySpecial.scorer=i;document.querySelectorAll('#scorerGrid .sc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+async function selScorer(i,el){
+  mySpecial.scorer=i;
+  document.querySelectorAll('#scorerGrid .sc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  if(fbReady&&userKey){
+    const {db,ref,update}=fb();
+    try{
+      await update(ref(db,'players/'+userKey+'/special'),{scorer:i});
+      showToast('⚽ נשמר: '+SCORERS[i].n);
+      document.getElementById('saveScorerBtn').textContent='✓ נשמר ☁️';
+    }catch(e){showToast('❌ שגיאה',true);}
+  }
+}
 async function saveScorer(){
   if(mySpecial.scorer===undefined){showToast('⚠️ בחר שחקן!',true);return;}
   if(fbReady&&userKey){const {db,ref,update}=fb();try{await update(ref(db,'players/'+userKey+'/special'),{scorer:mySpecial.scorer});showToast('⚽ נשמר: '+SCORERS[mySpecial.scorer].n);document.getElementById('saveScorerBtn').textContent='✓ נשמר ☁️';}catch(e){showToast('❌ שגיאה',true);}}
@@ -785,23 +937,33 @@ async function recalcAllScores(){
   if(!fbReady)return;
   const {db,ref,get,update}=fb();
   try{
-    const resSnap=await get(ref(db,'results'));
-    if(!resSnap.exists())return;
-    const results=resSnap.val();
-    const playSnap=await get(ref(db,'players'));
+    // טען הכל במקביל
+    const [resSnap, playSnap, specSnap] = await Promise.all([
+      get(ref(db,'results')),
+      get(ref(db,'players')),
+      get(ref(db,'specialResults'))
+    ]);
     if(!playSnap.exists())return;
-    const players=playSnap.val();
+    const results = resSnap.exists() ? resSnap.val() : {};
+    const players = playSnap.val();
+    const spec = specSnap.exists() ? specSnap.val() : {};
     const updates={};
+
     Object.entries(players).forEach(([key,player])=>{
       const bets=player.bets||{};
       let totalPts=0,totalCorrect=0,totalExact=0;
+
+      // חשב נקודות משחקים
       Object.entries(results).forEach(([mid,res])=>{
         const bet=bets[mid];if(!bet)return;
         const hGoals=parseInt(res.h)||0,aGoals=parseInt(res.a)||0;
         const realResult=hGoals>aGoals?'1':hGoals<aGoals?'2':'X';
         const realDiff=Math.abs(hGoals-aGoals);
         let eff=bet.r||'';
-        if(!eff&&bet.result){const mo=MATCHES.find(m=>m.id===mid);if(mo){if(bet.result===mo.home)eff='1';else if(bet.result===mo.away)eff='2';else if(bet.result==='תיקו')eff='X';}}
+        if(!eff&&bet.result){
+          const mo=MATCHES.find(m=>m.id===mid);
+          if(mo){if(bet.result===mo.home)eff='1';else if(bet.result===mo.away)eff='2';else if(bet.result==='תיקו')eff='X';}
+        }
         if(!eff)return;
         let betH=0,betA=0;
         if(bet.sh!==undefined&&bet.sh!==''&&bet.sh!==null){betH=parseInt(bet.sh)||0;betA=parseInt(bet.sa)||0;}
@@ -814,14 +976,28 @@ async function recalcAllScores(){
           else{totalPts+=1;}
         }
       });
-      updates['players/'+key+'/info/pts']=totalPts;
+
+      // חשב נקודות מיוחדות ישירות כאן
+      const sp=player.special||{};
+      let specialPts=0;
+      if(spec.champIdx!==undefined && Number(sp.champion)===Number(spec.champIdx)){
+        specialPts+=oddsToPoints(CHAMPS[Number(spec.champIdx)]&&CHAMPS[Number(spec.champIdx)].o, 20);
+      }
+      if(spec.scorerIdx!==undefined && Number(sp.scorer)===Number(spec.scorerIdx)){
+        specialPts+=oddsToPoints(SCORERS[Number(spec.scorerIdx)]&&SCORERS[Number(spec.scorerIdx)].o, 15);
+      }
+
+      updates['players/'+key+'/info/pts']=totalPts+specialPts;
       updates['players/'+key+'/info/correct']=totalCorrect;
       updates['players/'+key+'/info/exact']=totalExact;
+      updates['players/'+key+'/info/specialPts']=specialPts;
     });
     await update(ref(db,'/'),updates);
   }catch(e){console.log('recalc err',e);}
 }
 
+
+let prevPositions = {};
 function renderLeaderboard(){
   const colors=['#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12','#e91e63'];
   const list=Object.entries(allPlayers).map(([k,v])=>({
@@ -834,24 +1010,28 @@ function renderLeaderboard(){
   box.innerHTML=list.map((u,i)=>{
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'rx';
     const color=colors[i%colors.length];
-    return `<div class="lb-row ${u.isMe?'me':''}">
+    const prevPos = prevPositions[u.key];
+    const moved = prevPos !== undefined && prevPos !== i ? (prevPos > i ? 'moving-up' : 'moving-down') : '';
+    return `<div class="lb-row ${u.isMe?'me':''} ${moved}">
       <div class="rank ${rc}">${i+1}</div>
       <div class="avatar" style="background:${color}22;color:${color}">${u.name.slice(0,2)}</div>
       <div class="lb-info">
-        <div class="lb-name">${u.name}${u.isMe?' ⭐':''}</div>
-        <div class="lb-sub"><span>✅ ${u.correct} נכון</span><span class="g">🎯 ${u.exact} מדויק</span></div>
+        <div class="lb-name">${u.name}${u.isMe?' ⭐':''}${getBadges(u)}</div>
+        <div class="lb-sub"><span>✅ ${u.correct} נכון</span><span class="g">🎯 ${u.exact} מדויק</span><span>${u.correct>0?Math.round(u.exact/u.correct*100)+'% מדויק':''}</span></div>
       </div>
       <div class="lb-pts"><div class="lb-pts-n">${u.pts}</div><div class="lb-pts-l">נקודות</div></div>
     </div>`;
   }).join('');
   const me=list.find(u=>u.isMe);
   if(me)document.getElementById('hPts').textContent=me.pts;
+  prevPositions = newPositions;
+  renderChart(list);
 }
 
 function updatePlayerCount(){document.getElementById('playerCount').textContent=Object.keys(allPlayers).length||1;}
 function updateBetCount(){document.getElementById('betCount').textContent=Object.values(myBets).filter(b=>b.r).length;}
 
-const EN_TEAMS={'Mexico':'מקסיקו','South Africa':'דרום אפריקה','South Korea':'דרום קוריאה','Czech Republic':"צ'כיה",'Czechia':"צ'כיה",'Canada':'קנדה','Bosnia and Herzegovina':'בוסניה והרצגובינה','Qatar':'קטאר','Switzerland':'שוויץ','Brazil':'ברזיל','Morocco':'מרוקו','Haiti':'האיטי','Scotland':'סקוטלנד','United States':'ארה"ב','USA':'ארה"ב','Paraguay':'פראגוואי','Australia':'אוסטרליה','Turkey':'טורקיה','Turkiye':'טורקיה','Germany':'גרמניה','Curacao':'קוראסאו','Curaçao':'קוראסאו','Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור','Netherlands':'הולנד','Japan':'יפן','Sweden':'שוודיה','Tunisia':'תוניסיה','Belgium':'בלגיה','Egypt':'מצרים','Iran':'איראן','New Zealand':'ניו זילנד','Spain':'ספרד','Cape Verde':'קייפ ורדה','Saudi Arabia':'ערב הסעודית','Uruguay':'אורוגוואי','France':'צרפת','Senegal':'סנגל','Iraq':'עיראק','Norway':'נורווגיה','Argentina':'ארגנטינה','Algeria':"אלג'יריה",'Austria':'אוסטריה','Jordan':'ירדן','Portugal':'פורטוגל','DR Congo':'קונגו','Congo':'קונגו','Uzbekistan':'אוזבקיסטן','Colombia':'קולומביה','England':'אנגליה','Croatia':'קרואטיה','Ghana':'גאנה','Panama':'פנמה'};
+const EN_TEAMS={'Mexico':'מקסיקו','South Africa':'דרום אפריקה','South Korea':'דרום קוריאה','Czech Republic':"צ'כיה",'Czechia':"צ'כיה",'Canada':'קנדה','Bosnia and Herzegovina':'בוסניה והרצגובינה','Qatar':'קטאר','Switzerland':'שוויץ','Brazil':'ברזיל','Morocco':'מרוקו','Haiti':'האיטי','Scotland':'סקוטלנד','United States':'ארה"ב','USA':'ארה"ב','Paraguay':'פראגוואי','Australia':'אוסטרליה','Turkey':'טורקיה','Turkiye':'טורקיה','Germany':'גרמניה','Curacao':'קוראסאו','Curacao':'קוראסאו','Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור','Netherlands':'הולנד','Japan':'יפן','Sweden':'שוודיה','Tunisia':'תוניסיה','Belgium':'בלגיה','Egypt':'מצרים','Iran':'איראן','New Zealand':'ניו זילנד','Spain':'ספרד','Cape Verde':'קייפ ורדה','Saudi Arabia':'ערב הסעודית','Uruguay':'אורוגוואי','France':'צרפת','Senegal':'סנגל','Iraq':'עיראק','Norway':'נורווגיה','Argentina':'ארגנטינה','Algeria':"אלג'יריה",'Austria':'אוסטריה','Jordan':'ירדן','Portugal':'פורטוגל','DR Congo':'קונגו','Congo':'קונגו','Uzbekistan':'אוזבקיסטן','Colombia':'קולומביה','England':'אנגליה','Croatia':'קרואטיה','Ghana':'גאנה','Panama':'פנמה'};
 
 function findMatch(homeEn,awayEn,dateStr){
   const homeHe=EN_TEAMS[homeEn],awayHe=EN_TEAMS[awayEn];
@@ -887,6 +1067,91 @@ async function autoUpdateResults(){
       }
     }
   }catch(e){console.log('autoUpdate err',e);}
+}
+
+function populateAdminSelects() {
+  const cs = document.getElementById('champWinner');
+  const ss = document.getElementById('scorerWinner');
+  if (!cs || !ss) return;
+  cs.innerHTML = '<option value="">-- בחר אלוף --</option>' +
+    CHAMPS.map((c,i) => `<option value="${i}">${c.n} ${c.o}</option>`).join('');
+  ss.innerHTML = '<option value="">-- בחר מלך שערים --</option>' +
+    SCORERS.map((s,i) => `<option value="${i}">${s.n} (${s.t})</option>`).join('');
+  // Load existing selections
+  if (fbReady) {
+    const {db,ref,get} = fb();
+    get(ref(db,'specialResults')).then(snap => {
+      if (!snap.exists()) return;
+      const d = snap.val();
+      if (d.champIdx !== undefined) cs.value = d.champIdx;
+      if (d.scorerIdx !== undefined) ss.value = d.scorerIdx;
+    });
+  }
+}
+
+async function setChampWinner() {
+  const idx = parseInt(document.getElementById('champWinner').value);
+  if (isNaN(idx)) { showToast('⚠️ בחר נבחרת!', true); return; }
+  const {db,ref,set,get} = fb();
+  await set(ref(db,'specialResults/champIdx'), idx);
+  // Award 20 points to players who guessed correctly
+  await calcSpecialPoints();
+  showToast('🏆 אלוף נקבע: ' + CHAMPS[idx].n);
+  document.getElementById('specialStatus').textContent = 'אלוף: ' + CHAMPS[idx].n + ' | ';
+}
+
+async function setScorerWinner() {
+  const idx = parseInt(document.getElementById('scorerWinner').value);
+  if (isNaN(idx)) { showToast('⚠️ בחר שחקן!', true); return; }
+  const {db,ref,set} = fb();
+  await set(ref(db,'specialResults/scorerIdx'), idx);
+  await calcSpecialPoints();
+  showToast('⚽ מלך שערים נקבע: ' + SCORERS[idx].n);
+  const el = document.getElementById('specialStatus');
+  el.textContent = (el.textContent || '') + 'מלך שערים: ' + SCORERS[idx].n;
+}
+
+function oddsToPoints(oddsStr, basePts) {
+  // Convert +475 -> 475, +10000 -> 10000
+  const n = parseInt((oddsStr||'').replace('+','')) || 500;
+  // Scale: +475 = 1x, +5000 = 3x, +10000 = 5x, +100000 = 10x
+  const mult = Math.max(1, Math.round(Math.log10(n) * 2 - 3));
+  return basePts * mult;
+}
+
+async function calcSpecialPoints(){
+  await recalcAllScores();
+}
+
+
+async function resetAll(){
+  if(!confirm('⚠️ האם אתה בטוח? פעולה זו תמחק את כל התוצאות והנקודות לכולם!'))return;
+  if(!confirm('בטוח לגמרי? אין דרך חזרה!'))return;
+  if(!fbReady){showToast('❌ אין חיבור',true);return;}
+  const {db,ref,get,remove,update}=fb();
+  try{
+    // מחק תוצאות ותוצאות מיוחדות
+    await remove(ref(db,'results'));
+    await remove(ref(db,'specialResults'));
+    // אפס נקודות לכל השחקנים
+    const snap=await get(ref(db,'players'));
+    if(snap.exists()){
+      const updates={};
+      Object.keys(snap.val()).forEach(key=>{
+        updates['players/'+key+'/info/pts']=0;
+        updates['players/'+key+'/info/correct']=0;
+        updates['players/'+key+'/info/exact']=0;
+        updates['players/'+key+'/info/specialPts']=0;
+      });
+      await update(ref(db,'/'),updates);
+    }
+    showToast('✅ הכל אופס בהצלחה!');
+    // רענן פאנל מנהל
+    setTimeout(()=>loadExistingResults(),500);
+  }catch(e){
+    showToast('❌ שגיאה באיפוס',true);
+    console.log('reset err',e);
+  }
 }
 
 function checkAdminPass(){
@@ -940,45 +1205,61 @@ async function confirmResult(mid){
   const sh=document.getElementById('ah_'+mid).value,sa=document.getElementById('aa_'+mid).value;
   if(sh===''||sa===''){showToast('⚠️ הכנס תוצאה!',true);return;}
   const hGoals=parseInt(sh),aGoals=parseInt(sa);
-  const realResult=hGoals>aGoals?'1':hGoals<aGoals?'2':'X';
-  const realDiff=Math.abs(hGoals-aGoals);
   if(!fbReady){showToast('❌ אין חיבור',true);return;}
-  const {db,ref,get,update,set}=fb();
+  const {db,ref,set}=fb();
   const btn=document.getElementById('abtn_'+mid);
-  btn.textContent='⏳ מחשב...';
+  btn.textContent='⏳ שומר...';
   try{
-    const snap=await get(ref(db,'players'));
-    if(!snap.exists())return;
-    const players=snap.val(),updates={};
-    const matchObj=MATCHES.find(m=>m.id===mid);
-    Object.entries(players).forEach(([key,player])=>{
-      const bets=player.bets||{},bet=bets[mid];
-      if(!bet||bet.scored)return;
-      let eff=bet.r||'';
-      if(!eff&&bet.result&&matchObj){if(bet.result===matchObj.home)eff='1';else if(bet.result===matchObj.away)eff='2';else if(bet.result==='תיקו')eff='X';}
-      if(!eff)return;
-      let betH=0,betA=0;
-      if(bet.sh!==undefined&&bet.sh!==''&&bet.sh!==null){betH=parseInt(bet.sh)||0;betA=parseInt(bet.sa)||0;}
-      else if(bet.score&&bet.score.includes(':')){const p=bet.score.split(':');betH=parseInt(p[0])||0;betA=parseInt(p[1])||0;}
-      let pts=0,correct=0,exact=0;
-      if(eff===realResult){
-        correct=1;
-        const bd=Math.abs(betH-betA);
-        if(betH===hGoals&&betA===aGoals){pts=5;exact=1;}
-        else if(bd===realDiff){pts=3;}
-        else{pts=1;}
-      }
-      updates['players/'+key+'/info/pts']=((player.info&&player.info.pts)||0)+pts;
-      updates['players/'+key+'/info/correct']=((player.info&&player.info.correct)||0)+correct;
-      updates['players/'+key+'/info/exact']=((player.info&&player.info.exact)||0)+exact;
-      updates['players/'+key+'/bets/'+mid+'/scored']=true;
-    });
-    await update(ref(db,'/'),updates);
+    // שמור תוצאה ב-DB
     await set(ref(db,'results/'+mid),{h:hGoals,a:aGoals,ts:Date.now()});
-    btn.textContent='✓ עודכן!';btn.classList.add('done');
+    btn.textContent='⏳ מחשב נקודות...';
+    // חשב מחדש את כל הניקוד מאפס
+    await recalcAllScores();
+    btn.textContent='✓ עודכן!';
+    btn.classList.add('done');
     showToast('✅ תוצאה עודכנה — נקודות חושבו לכולם!');
-  }catch(e){btn.textContent='שגיאה';showToast('❌ שגיאה בעדכון',true);}
+    const mo=MATCHES.find(m=>m.id===mid);
+    if(mo) sendNotification('🏆 תוצאה עודכנה!', mo.home+' '+hGoals+':'+aGoals+' '+mo.away);
+  }catch(e){
+    console.log('confirm err',e);
+    btn.textContent='שגיאה';
+    showToast('❌ שגיאה בעדכון',true);
+  }
 }
+
+// ---- COUNTDOWN TO NEXT MATCH ----
+function updateCountdown() {
+  const box = document.getElementById('nextMatchBox');
+  if (!box) return;
+  const now = new Date();
+  // find next unlocked match
+  const next = MATCHES.find(m => new Date(m.kickoffUTC) > now);
+  if (!next) { box.innerHTML = ''; return; }
+  const kickoff = new Date(next.kickoffUTC);
+  const diff = kickoff - now;
+  if (diff <= 0) { box.innerHTML = ''; return; }
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  const hf = flagImg(next.home, 20);
+  const af = flagImg(next.away, 20);
+  box.innerHTML = `<div class="countdown">
+    <div>
+      <div class="cd-label">⏱️ המשחק הבא</div>
+      <div class="cd-match">${hf} ${next.home} נגד ${next.away} ${af}</div>
+      <div class="cd-label" style="margin-top:4px">${toIsraelTime(next.kickoffUTC)} (ישראל)</div>
+    </div>
+    <div class="cd-time">
+      <div class="cd-unit"><span class="cd-num">${String(days).padStart(2,'0')}</span><span class="cd-txt">ימים</span></div>
+      <div class="cd-unit"><span class="cd-num">${String(hours).padStart(2,'0')}</span><span class="cd-txt">שעות</span></div>
+      <div class="cd-unit"><span class="cd-num">${String(mins).padStart(2,'0')}</span><span class="cd-txt">דקות</span></div>
+      <div class="cd-unit"><span class="cd-num">${String(secs).padStart(2,'0')}</span><span class="cd-txt">שניות</span></div>
+    </div>
+  </div>`;
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
 
 // ---- GROUPS STANDINGS ----
 const WC_URL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
@@ -986,8 +1267,8 @@ const EN_TO_HE = {
   'Mexico':'מקסיקו','South Africa':'דרום אפריקה','South Korea':'דרום קוריאה','Czechia':"צ'כיה",'Czech Republic':"צ'כיה",
   'Canada':'קנדה','Bosnia and Herzegovina':'בוסניה והרצגובינה','Qatar':'קטאר','Switzerland':'שוויץ',
   'Brazil':'ברזיל','Morocco':'מרוקו','Haiti':'האיטי','Scotland':'סקוטלנד',
-  'USA':'ארהב','Paraguay':'פראגוואי','Australia':'אוסטרליה','Turkey':'טורקיה','Türkiye':'טורקיה',
-  'Germany':'גרמניה','Curacao':'קוראסאו','Curaçao':'קוראסאו','Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור',
+  'USA':'ארהב','Paraguay':'פראגוואי','Australia':'אוסטרליה','Turkey':'טורקיה','Turkiye':'טורקיה',
+  'Germany':'גרמניה','Curacao':'קוראסאו','Curacao':'קוראסאו','Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור',
   'Netherlands':'הולנד','Japan':'יפן','Sweden':'שוודיה','Tunisia':'תוניסיה',
   'Belgium':'בלגיה','Egypt':'מצרים','Iran':'איראן','New Zealand':'ניו זילנד',
   'Spain':'ספרד','Cape Verde':'קייפ ורדה','Saudi Arabia':'ערב הסעודית','Uruguay':'אורוגוואי',
@@ -1103,6 +1384,173 @@ function renderGroup(g) {
     <p style="font-size:12px;color:var(--muted);text-align:center">✅ = מעפילה לשלב הנוקאאוט</p>`;
 }
 
+function getBadges(u) {
+  let b = '';
+  if (u.exact >= 10) b += ' 🔮';      // 10+ תוצאות מדויקות
+  else if (u.exact >= 5) b += ' ⚡';   // 5+ מדויקות
+  if (u.correct >= 20) b += ' 🦁';     // 20+ נכון
+  if (u.pts >= 50) b += ' 🥇';         // 50+ נקודות
+  if (u.exact > 0 && u.correct > 0 && Math.round(u.exact/u.correct*100) === 100) b += ' 🎯'; // 100% דיוק
+  return b ? '<span style="font-size:14px;margin-right:4px">'+b+'</span>' : '';
+}
+
+function exportExcel() {
+  const list = Object.entries(allPlayers).map(([k,v]) => ({
+    שם: (v.info&&v.info.name)||k,
+    נקודות: (v.info&&v.info.pts)||0,
+    נכון: (v.info&&v.info.correct)||0,
+    מדויק: (v.info&&v.info.exact)||0,
+    'אחוז דיוק': (v.info&&v.info.correct)>0 ? Math.round(((v.info&&v.info.exact)||0)/((v.info&&v.info.correct)||1)*100)+'%' : '0%'
+  })).sort((a,b)=>b.נקודות-a.נקודות);
+
+  // Build CSV
+  const headers = Object.keys(list[0]).join(',');
+  const rows = list.map(r=>Object.values(r).join(',')).join('\n');
+  const csv = '\uFEFF' + headers + '\n' + rows;
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'mondial2026_' + new Date().toLocaleDateString('he-IL').replace(/\//g,'-') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 הטבלה יוצאה בהצלחה!');
+}
+
+// ---- NOTIFICATIONS ----
+function toggleNotifications() {
+  const btn = document.getElementById('notifBtn');
+  if (!('Notification' in window)) {
+    showToast('הדפדפן לא תומך בהתראות', true);
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    showToast('התראות כבר מופעלות ✅');
+    btn.classList.add('on');
+    btn.textContent = '🔔 התראות מופעלות';
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if (perm === 'granted') {
+      btn.classList.add('on');
+      btn.textContent = '🔔 התראות מופעלות';
+      showToast('✅ תקבל התראות כשיתעדכנו תוצאות!');
+      new Notification('מונדיאל 2026 🏆', {body: 'התראות הופעלו! תקבל עדכון על כל תוצאה.'});
+    } else {
+      showToast('לא אושרו התראות', true);
+    }
+  });
+}
+
+function sendNotification(title, body) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, {body, icon: 'https://flagcdn.com/il.svg'});
+  }
+}
+
+// ---- CHART ----
+function renderChart(list) {
+  const wrap = document.getElementById('chartWrap');
+  const bars = document.getElementById('chartBars');
+  if (!wrap || !bars || !list.length) return;
+  wrap.style.display = 'block';
+  const max = Math.max(...list.map(u => u.pts), 1);
+  bars.innerHTML = list.slice(0,10).map((u,i) => {
+    const colors = ['#F5A623','#4ade80','#3498db','#9b59b6','#e74c3c','#1abc9c','#f39c12','#e91e63','#e67e22','#27ae60'];
+    const h = Math.round((u.pts / max) * 100);
+    return `<div class="chart-bar-wrap">
+      <div class="chart-val">${u.pts}</div>
+      <div class="chart-bar" style="height:${h}px;background:${colors[i%colors.length]}"></div>
+      <div class="chart-label">${u.name.slice(0,6)}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildHistory() {
+  const box = document.getElementById('historyContent');
+  if (!box) return;
+  if (!userName) { box.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px">התחבר כדי לראות את הניחושים שלך</div>'; return; }
+  
+  if (!Object.keys(myBets).length) {
+    box.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px">עוד לא ניחשת משחקים</div>';
+    return;
+  }
+
+  // Get results + specialResults from Firebase
+  const {db,ref,get} = fb();
+  Promise.all([
+    get(ref(db,'results')),
+    get(ref(db,'specialResults'))
+  ]).then(([snap, specSnap]) => {
+    const results = snap.exists() ? snap.val() : {};
+    const spec = specSnap.exists() ? specSnap.val() : {};
+    
+    const rows = MATCHES.map(m => {
+      const bet = myBets[m.id];
+      if (!bet || !bet.r) return null;
+      
+      const res = results[m.id];
+      const hf = flagImg(m.home, 20);
+      const af = flagImg(m.away, 20);
+      const pickLabel = bet.r==='1' ? m.home : bet.r==='2' ? m.away : 'תיקו';
+      const scoreLabel = bet.score || (bet.sh + ':' + bet.sa) || '';
+      const locked = isLocked(m);
+      
+      let statusClass = 'hist-pending', statusText = '⏳ ממתין';
+      if (res) {
+        const realResult = res.h > res.a ? '1' : res.h < res.a ? '2' : 'X';
+        const realDiff = Math.abs(res.h - res.a);
+        const betH = parseInt(bet.sh)||0, betA = parseInt(bet.sa)||0;
+        const betDiff = Math.abs(betH - betA);
+        if (bet.r === realResult) {
+          if (betH === res.h && betA === res.a) {
+            statusClass = 'hist-exact'; statusText = '🎯 מדויק! +5';
+          } else if (betDiff === realDiff) {
+            statusClass = 'hist-correct'; statusText = '✅ הפרש נכון +3';
+          } else {
+            statusClass = 'hist-correct'; statusText = '✅ מנצח נכון +1';
+          }
+        } else {
+          statusClass = 'hist-wrong'; statusText = '❌ שגוי +0';
+        }
+      } else if (locked) {
+        statusClass = 'hist-pending'; statusText = '🔒 ממתין לתוצאה';
+      }
+      
+      return `<div class="hist-row">
+        <div class="hist-match">${hf} ${m.home} נגד ${m.away} ${af}</div>
+        <div class="hist-pick">ניחוש: <strong>${pickLabel}</strong>${scoreLabel?' ('+scoreLabel+')':''}</div>
+        ${res ? `<div class="hist-score">${res.h}:${res.a}</div>` : ''}
+        <div class="hist-result ${statusClass}">${statusText}</div>
+      </div>`;
+    }).filter(Boolean);
+
+    const total = rows.length;
+    const correct = Object.values(myBets).filter(b => {
+      if (!b.r) return false;
+      const res = results[Object.keys(myBets).find(k => myBets[k] === b)];
+      return res && (b.r === (res.h > res.a ? '1' : res.h < res.a ? '2' : 'X'));
+    }).length;
+
+    const champName = mySpecial.champion!==undefined ? CHAMPS[mySpecial.champion]&&CHAMPS[mySpecial.champion].n : null;
+    const scorerName = mySpecial.scorer!==undefined ? SCORERS[mySpecial.scorer]&&SCORERS[mySpecial.scorer].n : null;
+    const champWon = spec.champIdx!==undefined && Number(mySpecial.champion)===Number(spec.champIdx);
+    const scorerWon = spec.scorerIdx!==undefined && Number(mySpecial.scorer)===Number(spec.scorerIdx);
+
+    box.innerHTML = `
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="stat-card" style="flex:1"><div class="num">${total}</div><div class="lbl">ניחושים</div></div>
+        <div class="stat-card" style="flex:1"><div class="num" style="color:#4ade80">${Object.keys(results).filter(mid=>myBets[mid]&&myBets[mid].r).length}</div><div class="lbl">הוכרעו</div></div>
+      </div>
+      ${champName?`<div class="hist-row"><div class="hist-match">🏆 ניחוש אלוף: <strong>${champName}</strong></div><div class="hist-result ${spec.champIdx===undefined?'hist-pending':champWon?'hist-exact':'hist-wrong'}">${spec.champIdx===undefined?'⏳ ממתין':champWon?'🎯 נכון!':'❌ שגוי'}</div></div>`:''}
+      ${scorerName?`<div class="hist-row"><div class="hist-match">⚽ ניחוש מלך שערים: <strong>${scorerName}</strong></div><div class="hist-result ${spec.scorerIdx===undefined?'hist-pending':scorerWon?'hist-exact':'hist-wrong'}">${spec.scorerIdx===undefined?'⏳ ממתין':scorerWon?'🎯 נכון!':'❌ שגוי'}</div></div>`:''}
+      ${rows.join('')}`;
+  }).catch((e) => {
+    console.log('history err', e);
+    box.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px">שגיאה בטעינת נתונים</div>';
+  });
+}
+
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -1110,7 +1558,8 @@ function showPage(id,btn){
   if(btn)btn.classList.add('active');
   if(id==='lb'){recalcAllScores();renderLeaderboard();}
   if(id==='groups'){loadGroups();}
-  if(id==='admin'){setTimeout(autoUpdateResults,500);setTimeout(loadExistingResults,300);}
+  if(id==='history'){buildHistory();}
+  if(id==='admin'){setTimeout(autoUpdateResults,500);setTimeout(loadExistingResults,300);setTimeout(populateAdminSelects,400);}
 }
 
 function showToast(msg,err){
