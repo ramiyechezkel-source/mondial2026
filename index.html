@@ -1074,9 +1074,9 @@ function populateAdminSelects() {
   const ss = document.getElementById('scorerWinner');
   if (!cs || !ss) return;
   cs.innerHTML = '<option value="">-- בחר אלוף --</option>' +
-    CHAMPS.map((c,i) => `<option value="${i}">${c.n} ${c.o}</option>`).join('');
+    CHAMPS.map((c,i) => `<option value="${i}">${c.n} — ${c.o} — ${oddsToPoints(c.o,20)} נקודות</option>`).join('');
   ss.innerHTML = '<option value="">-- בחר מלך שערים --</option>' +
-    SCORERS.map((s,i) => `<option value="${i}">${s.n} (${s.t})</option>`).join('');
+    SCORERS.map((s,i) => `<option value="${i}">${s.n} (${s.t}) — ${s.o} — ${oddsToPoints(s.o,15)} נקודות</option>`).join('');
   // Load existing selections
   if (fbReady) {
     const {db,ref,get} = fb();
@@ -1097,7 +1097,8 @@ async function setChampWinner() {
   // Award 20 points to players who guessed correctly
   await calcSpecialPoints();
   showToast('🏆 אלוף נקבע: ' + CHAMPS[idx].n);
-  document.getElementById('specialStatus').textContent = 'אלוף: ' + CHAMPS[idx].n + ' | ';
+  const el = document.getElementById('specialStatus');
+  el.textContent = 'אלוף: ' + CHAMPS[idx].n + ' (' + oddsToPoints(CHAMPS[idx].o,20) + ' נקודות) | ';
 }
 
 async function setScorerWinner() {
@@ -1107,8 +1108,8 @@ async function setScorerWinner() {
   await set(ref(db,'specialResults/scorerIdx'), idx);
   await calcSpecialPoints();
   showToast('⚽ מלך שערים נקבע: ' + SCORERS[idx].n);
-  const el = document.getElementById('specialStatus');
-  el.textContent = (el.textContent || '') + 'מלך שערים: ' + SCORERS[idx].n;
+  const el2 = document.getElementById('specialStatus');
+  el2.textContent = (el2.textContent || '') + 'מלך שערים: ' + SCORERS[idx].n + ' (' + oddsToPoints(SCORERS[idx].o,15) + ' נקודות)';
 }
 
 function oddsToPoints(oddsStr, basePts) {
