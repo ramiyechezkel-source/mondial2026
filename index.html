@@ -724,7 +724,8 @@ async function confirmResult(mid){
 async function autoUpdateResults(){
   if(!fbReady)return;
   try{
-    const res=await fetch(FD_BASE+'/competitions/WC/matches?status=FINISHED',{headers:{'X-Auth-Token':FD_KEY}});
+    const proxy='https://corsproxy.io/?'+encodeURIComponent(FD_BASE+'/competitions/WC/matches?status=FINISHED');
+    const res=await fetch(proxy,{headers:{'X-Auth-Token':FD_KEY}});
     if(!res.ok)return;
     const data=await res.json();
     for(const m of(data.matches||[])){
@@ -760,43 +761,37 @@ document.getElementById('authPass').addEventListener('keydown',e=>{if(e.key==='E
 document.getElementById('authName').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('authPass').focus();});
 document.getElementById('adminPassInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkAdminPass();});
 
-// Ticker - football-data.org
+// Ticker - TheSportsDB (עבד בעבר, ללא CORS)
 async function loadTicker(){
   const track=document.getElementById('tickerTrack');if(!track)return;
   try{
-    const today=new Date().toISOString().slice(0,10);
-    const urls=[
-      FD_BASE+'/competitions/WC/matches?status=FINISHED&limit=10',
-      FD_BASE+'/matches?date='+today+'&status=FINISHED',
-      FD_BASE+'/matches?date='+today
-    ];
-    let matches=[];
-    for(const url of urls){
-      try{
-        console.log('Ticker trying:', url);
-        const res=await fetch(url,{headers:{'X-Auth-Token':FD_KEY}});
-        console.log('Status:', res.status, url);
-        if(!res.ok){console.log('Error body:', await res.text());continue;}
-        const data=await res.json();
-        console.log('Matches found:', (data.matches||[]).length, 'from', url);
-        matches=(data.matches||[]);
-        if(matches.length)break;
-      }catch(e){console.log('Fetch error:', e.message);continue;}
+    const today=new Date();
+    const d=today.getUTCFullYear()+'-'+String(today.getUTCMonth()+1).padStart(2,'0')+'-'+String(today.getUTCDate()).padStart(2,'0');
+    const yd=new Date(today.getTime()-86400000);
+    const d2=yd.getUTCFullYear()+'-'+String(yd.getUTCMonth()+1).padStart(2,'0')+'-'+String(yd.getUTCDate()).padStart(2,'0');
+    
+    let events=[];
+    for(const date of [d, d2]){
+      const res=await fetch('https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d='+date);
+      const data=await res.json();
+      events=data.events||[];
+      if(events.length)break;
     }
-    if(!matches.length){
+    
+    if(!events.length){
       track.innerHTML='<div class="titem">⚽ מונדיאל 2026 מתחיל 11.6!</div><div class="titem">🏆 104 משחקים — נחש עכשיו!</div>';
       return;
     }
-    const items=matches.slice(0,15).map(m=>{
-      const h=m.homeTeam&&(m.homeTeam.shortName||m.homeTeam.name)||'';
-      const a=m.awayTeam&&(m.awayTeam.shortName||m.awayTeam.name)||'';
-      const hs=m.score&&m.score.fullTime&&m.score.fullTime.home;
-      const as=m.score&&m.score.fullTime&&m.score.fullTime.away;
-      const hasScore=(hs!==null&&hs!==undefined&&as!==null&&as!==undefined);
+    
+    const items=events.slice(0,15).map(e=>{
+      const h=e.strHomeTeam||'',a=e.strAwayTeam||'';
+      const hs=e.intHomeScore,as=e.intAwayScore;
+      const hasScore=hs!==null&&hs!==undefined&&as!==null&&as!==undefined;
       const score=hasScore?`<span class="tscore">${hs}:${as}</span>`:'<span style="color:var(--muted)">נגד</span>';
-      const comp=m.competition&&m.competition.name?`<span style="color:var(--muted);font-size:11px">[${m.competition.name}]</span>`:'';
-      return `<div class="titem">${comp} ⚽ ${h} ${score} ${a}</div>`;
+      const league=e.strLeague?`<span style="color:var(--muted);font-size:11px">[${e.strLeague}]</span>`:'';
+      return `<div class="titem">${league} ${h} ${score} ${a}</div>`;
     });
+    
     track.innerHTML=items.join('')+items.join('');
     track.style.animationDuration=Math.max(30,items.length*5)+'s';
   }catch(e){
