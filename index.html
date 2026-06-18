@@ -37,7 +37,7 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .badge.btn{cursor:pointer}.badge.btn:hover{border-color:var(--gold)}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-left:6px}
 .sync-dot.off{background:var(--red)}
-.nav-tabs{background:var(--dark);border-bottom:1px solid var(--border)}
+.nav-tabs{background:var(--dark);border-bottom:1px solid var(--border);position:sticky;top:62px;z-index:90}
 .nav-inner{max-width:1200px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none}
 .nav-inner::-webkit-scrollbar{display:none}
 .tab{padding:13px 18px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Heebo',sans-serif}
@@ -161,6 +161,12 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
 .titem{padding:0 24px;font-size:13px;color:var(--text);border-right:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px}
 .titem .tscore{color:var(--gold);font-weight:700}
 .main{padding-bottom:56px!important}
+.bets-controls{position:sticky;top:112px;background:var(--darker);z-index:80;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:12px}
+.mc.live{border-color:#4ade80;box-shadow:0 0 16px rgba(74,222,128,0.3)}
+.live-badge{background:#4ade80;color:#000;border-radius:4px;padding:2px 9px;font-weight:700;font-size:11px;display:inline-flex;align-items:center;gap:5px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#fff;display:inline-block;animation:livePulse 1s ease-in-out infinite}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
 @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr)}.tname{font-size:12px}.header-inner{padding:10px 12px}.logo-text h1{font-size:17px}}
 </style>
 </head>
@@ -212,7 +218,12 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
       <div class="stat-card"><div class="num" id="playerCount">1</div><div class="lbl">&#1502;&#1513;&#1514;&#1514;&#1508;&#1497;&#1501;</div></div>
     </div>
     <div id="nextMatchBox"></div>
-    <div class="gfilter" id="gfilter"></div>
+    <div class="bets-controls">
+      <div class="gfilter" id="gfilter" style="margin-bottom:8px"></div>
+      <button id="toggleOldBtn" onclick="toggleOldMatches()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:'Heebo',sans-serif">&#128065; הצג משחקים שהסתיימו</button>
+      <button id="jumpNextBtn" onclick="jumpToNext()" style="display:none;background:var(--gold);border:none;color:var(--darker);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif;margin-right:8px">&#11015;&#65039; קפוץ למשחק הבא</button>
+      <button id="backTopBtn" onclick="scrollToTop()" style="display:none;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:'Heebo',sans-serif;margin-right:8px">&#11014;&#65039; חזרה לראש</button>
+    </div>
     <div class="matches" id="matchGrid"></div>
   </div>
   <div class="page" id="page-groups">
@@ -333,6 +344,19 @@ function isLocked(m){
   var kickoff=new Date(m.kickoffUTC).getTime();
   return now>=(kickoff-3600000);
 }
+function isFinishedOld(m){
+  // הסתיים לפני שעתיים (משחק ~2 שעות + 2 שעות = 4 שעות מהקיקאוף)
+  var now=Date.now();
+  var kickoff=new Date(m.kickoffUTC).getTime();
+  return now>=(kickoff+4*3600000);
+}
+function isLive(m){
+  // משוחק עכשיו: בין הקיקאוף ל-120 דקות אחריו
+  var now=Date.now();
+  var kickoff=new Date(m.kickoffUTC).getTime();
+  return now>=kickoff && now<(kickoff+120*60000);
+}
+var hideOldMatches=true;
 function isSpecialLocked(){return new Date()>=new Date('2026-06-15T19:00:00Z');}
 function toIsraelTime(u){var d=new Date(u),il=new Date(d.getTime()+IL_OFFSET*3600000),days=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];return 'יום '+days[il.getUTCDay()]+' '+String(il.getUTCDate()).padStart(2,'0')+'.'+String(il.getUTCMonth()+1).padStart(2,'0')+' | '+String(il.getUTCHours()).padStart(2,'0')+':'+String(il.getUTCMinutes()).padStart(2,'0');}
 
@@ -352,7 +376,7 @@ window.onload=function(){
     userName=sn;userKey=sk;
     document.getElementById('hName').textContent=userName;
     document.getElementById('authModal').style.display='none';
-    function doLogin(){loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();setTimeout(function(){var cards=document.querySelectorAll('#matchGrid .mc');for(var i=0;i<cards.length;i++){if(!cards[i].classList.contains('locked')){cards[i].scrollIntoView({behavior:'smooth',block:'center'});break;}}},800);}
+    function doLogin(){loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();}
     if(fbReady){doLogin();}else{document.addEventListener('fbReady',doLogin,{once:true});}
   }else{document.getElementById('authModal').style.display='flex';}
 };
@@ -410,11 +434,33 @@ async function saveBetToCloud(mid){
 
 function buildGroupFilter(){document.getElementById('gfilter').innerHTML=['all','A','B','C','D','E','F','G','H','I','J','K','L'].map(function(g){return '<button class="gbtn '+(g==='all'?'active':'')+'" onclick="filterGroup(\''+g+'\',this)">'+(g==='all'?'הכל':'בית '+g)+'</button>';}).join('');}
 function filterGroup(g,btn){curGroup=g;document.querySelectorAll('.gbtn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');buildMatches();}
+function toggleOldMatches(){
+  hideOldMatches=!hideOldMatches;
+  var btn=document.getElementById('toggleOldBtn');
+  var jumpBtn=document.getElementById('jumpNextBtn');
+  if(btn){btn.textContent=hideOldMatches?'👁️ הצג משחקים שהסתיימו':'🙈 הסתר משחקים שהסתיימו';}
+  // כפתורי הקפיצה מופיעים רק במצב הצגה
+  if(jumpBtn){jumpBtn.style.display=hideOldMatches?'none':'inline-block';}
+  var backBtn=document.getElementById('backTopBtn');
+  if(backBtn){backBtn.style.display=hideOldMatches?'none':'inline-block';}
+  buildMatches();
+}
+function jumpToNext(){
+  var cards=document.querySelectorAll('#matchGrid .mc');
+  for(var i=0;i<cards.length;i++){
+    if(!cards[i].classList.contains('locked')){
+      cards[i].scrollIntoView({behavior:'smooth',block:'start'});
+      break;
+    }
+  }
+}
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 
 function mkBox(id,bg,bc,tc,mc,label,odd){return '<div id="'+id+'" style="background:'+bg+';border:1.5px solid '+bc+';border-radius:8px;padding:9px 5px;text-align:center;transition:.2s"><div style="font-size:13px;font-weight:700;color:'+tc+'">'+label+'</div><div style="font-size:11px;color:'+mc+'">'+odd+'</div></div>';}
 
 function buildMatches(){
   var filtered=curGroup==='all'?MATCHES:MATCHES.filter(function(m){return m.g===curGroup;});
+  if(hideOldMatches){filtered=filtered.filter(function(m){return !isFinishedOld(m);});}
   document.getElementById('matchGrid').innerHTML=filtered.map(function(m){
     var bet=myBets[m.id]||{};
     var hf=flagImg(m.home,36),af=flagImg(m.away,36);
@@ -430,7 +476,9 @@ function buildMatches(){
     var t2bg=betR==='2'?gold:card2,t2bc=betR==='2'?gold:'rgba(255,255,255,0.07)',t2c=betR==='2'?darker:text,t2m=betR==='2'?darker:muted;
     var boxes=mkBox('t1_'+m.id,t1bg,t1bc,t1c,t1m,m.home,m.ho)+mkBox('tx_'+m.id,txbg,txbc,txc,txm,'תיקו',m.do)+mkBox('t2_'+m.id,t2bg,t2bc,t2c,t2m,m.away,m.ao);
     var savedInd=betR?'<div style="text-align:center;padding:0 14px 10px;font-size:12px;color:#4ade80;font-weight:600" id="ind_'+m.id+'">✓ נשמר</div>':'<div style="text-align:center;padding:0 14px 10px;font-size:12px;color:var(--muted)" id="ind_'+m.id+'"></div>';
-    return '<div class="mc '+(locked?'locked':'')+'"><div class="mc-head"><span>🕐 '+toIsraelTime(m.kickoffUTC)+' (ישראל)</span>'+(locked?'<span class="lock-badge">🔒 ננעל</span>':'<span class="gbadge">בית '+m.g+'</span>')+'</div>'
+    var live=isLive(m);
+    var headBadge=live?'<span class="live-badge"><span class="live-dot"></span>משוחק עכשיו</span>':(locked?'<span class="lock-badge">🔒 ננעל</span>':'<span class="gbadge">בית '+m.g+'</span>');
+    return '<div class="mc '+(locked?'locked ':'')+(live?'live':'')+'"><div class="mc-head"><span>🕐 '+toIsraelTime(m.kickoffUTC)+' (ישראל)</span>'+headBadge+'</div>'
       +'<div class="mc-body"><div class="team"><div class="flag">'+hf+'</div><div class="tname">'+m.home+'</div><div style="font-size:10px;color:var(--muted)">'+(ABBREV[m.home]||'')+'</div></div>'
       +'<div class="mc-center"><div class="vs">נגד</div></div>'
       +'<div class="team"><div class="flag">'+af+'</div><div class="tname">'+m.away+'</div><div style="font-size:10px;color:var(--muted)">'+(ABBREV[m.away]||'')+'</div></div></div>'
@@ -729,7 +777,6 @@ function showPage(id,btn){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.getElementById('page-'+id).classList.add('active');
   if(btn)btn.classList.add('active');
-  if(id==='bets'){setTimeout(function(){var cards=document.querySelectorAll('#matchGrid .mc');for(var i=0;i<cards.length;i++){if(!cards[i].classList.contains('locked')){cards[i].scrollIntoView({behavior:'smooth',block:'center'});break;}}},200);}
   if(id==='lb'){recalcAllScores();renderLeaderboard();}
   if(id==='groups')loadGroups();
   if(id==='history')buildHistory();
