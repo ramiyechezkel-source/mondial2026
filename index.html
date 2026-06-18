@@ -292,6 +292,16 @@ body{font-family:'Heebo',sans-serif;background:var(--darker);color:var(--text);m
         </div>
         <div id="specialStatus" style="font-size:13px;color:#4ade80;margin-top:10px"></div>
       </div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px">
+        <div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:10px">&#128269; &#1489;&#1491;&#1497;&#1511;&#1514; &#1504;&#1497;&#1495;&#1493;&#1513;&#1497;&#1501; &#1490;&#1493;&#1500;&#1502;&#1497;&#1514;</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">&#1492;&#1510;&#1490; &#1488;&#1514; &#1499;&#1500; &#1492;&#1504;&#1497;&#1495;&#1493;&#1513;&#1497;&#1501; &#1499;&#1508;&#1497; &#1513;&#1504;&#1513;&#1502;&#1512;&#1493; &#1489;-Firebase</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+          <select id="rawBetPlayer" style="flex:1;background:var(--darker);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:14px;font-family:'Heebo',sans-serif;outline:none"><option value="">-- בחר שחקן --</option></select>
+          <button onclick="showRawBets()" style="background:var(--gold);color:var(--darker);border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">הצג</button>
+          <button onclick="auditMatchMapping()" style="background:#c0392b;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Heebo',sans-serif">🔍 בדוק התאמת ID</button>
+        </div>
+        <div id="rawBetsContent" style="font-size:13px;max-height:400px;overflow-y:auto"></div>
+      </div>
       <p style="color:var(--muted);font-size:13px;margin-bottom:16px">&#1492;&#1499;&#1504;&#1505; &#1514;&#1493;&#1510;&#1488;&#1493;&#1514; &#1502;&#1513;&#1495;&#1511;&#1497;&#1501; &#8212; &#1504;&#1511;&#1493;&#1491;&#1493;&#1514; &#1502;&#1495;&#1493;&#1513;&#1489;&#1493;&#1514; &#1488;&#1493;&#1496;&#1493;&#1502;&#1496;&#1497;&#1514;</p>
       <div id="adminMatches"></div>
     </div>
@@ -332,7 +342,7 @@ const ABBREV={'מקסיקו':'MEX','דרום אפריקה':'RSA','דרום קו�
 
 const EN_TEAMS={'Mexico':'מקסיקו','South Africa':'דרום אפריקה','South Korea':'דרום קוריאה','Czech Republic':"צ'כיה",'Czechia':"צ'כיה",'Canada':'קנדה','Bosnia and Herzegovina':'בוסניה והרצגובינה','Qatar':'קטאר','Switzerland':'שוויץ','Brazil':'ברזיל','Morocco':'מרוקו','Haiti':'האיטי','Scotland':'סקוטלנד','United States':'ארהב','USA':'ארהב','Paraguay':'פראגוואי','Australia':'אוסטרליה','Turkey':'טורקיה','Turkiye':'טורקיה','Germany':'גרמניה','Curacao':'קוראסאו','Ivory Coast':"חוף השנהב",'Ecuador':'אקוודור','Netherlands':'הולנד','Japan':'יפן','Sweden':'שוודיה','Tunisia':'תוניסיה','Belgium':'בלגיה','Egypt':'מצרים','Iran':'איראן','New Zealand':'ניו זילנד','Spain':'ספרד','Cape Verde':'קייפ ורדה','Saudi Arabia':'ערב הסעודית','Uruguay':'אורוגוואי','France':'צרפת','Senegal':'סנגל','Iraq':'עיראק','Norway':'נורווגיה','Argentina':'ארגנטינה','Algeria':"אלג'יריה",'Austria':'אוסטריה','Jordan':'ירדן','Portugal':'פורטוגל','DR Congo':'קונגו','Uzbekistan':'אוזבקיסטן','Colombia':'קולומביה','England':'אנגליה','Croatia':'קרואטיה','Ghana':'גאנה','Panama':'פנמה'};
 
-const MATCHES=[{id:'m1',g:'A',home:'מקסיקו',away:'דרום אפריקה',kickoffUTC:'2026-06-11T19:00:00Z',ho:1.8,do:3.5,ao:4.2},{id:'m2',g:'A',home:'דרום קוריאה',away:"צ'כיה",kickoffUTC:'2026-06-12T02:00:00Z',ho:2.1,do:3.2,ao:3.5},{id:'m3',g:'B',home:'קנדה',away:'בוסניה והרצגובינה',kickoffUTC:'2026-06-12T19:00:00Z',ho:2.0,do:3.3,ao:3.6},{id:'m4',g:'D',home:'ארהב',away:'פראגוואי',kickoffUTC:'2026-06-13T01:00:00Z',ho:2.0,do:3.2,ao:3.7},{id:'m5',g:'B',home:'קטאר',away:'שוויץ',kickoffUTC:'2026-06-13T19:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m6',g:'C',home:'ברזיל',away:'מרוקו',kickoffUTC:'2026-06-13T22:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m7',g:'C',home:'האיטי',away:'סקוטלנד',kickoffUTC:'2026-06-14T01:00:00Z',ho:4.2,do:3.3,ao:1.9},{id:'m8',g:'D',home:'אוסטרליה',away:'טורקיה',kickoffUTC:'2026-06-14T04:00:00Z',ho:2.5,do:3.1,ao:2.9},{id:'m9',g:'E',home:'גרמניה',away:'קוראסאו',kickoffUTC:'2026-06-14T17:00:00Z',ho:1.1,do:9.0,ao:22.0},{id:'m10',g:'F',home:'הולנד',away:'יפן',kickoffUTC:'2026-06-14T20:00:00Z',ho:1.9,do:3.4,ao:4.0},{id:'m11',g:'E',home:'חוף השנהב',away:'אקוודור',kickoffUTC:'2026-06-14T23:00:00Z',ho:2.3,do:3.2,ao:3.1},{id:'m12',g:'F',home:'שוודיה',away:'תוניסיה',kickoffUTC:'2026-06-15T02:00:00Z',ho:1.8,do:3.4,ao:4.2},{id:'m13',g:'H',home:'ספרד',away:'קייפ ורדה',kickoffUTC:'2026-06-15T16:00:00Z',ho:1.8,do:3.5,ao:4.5},{id:'m14',g:'G',home:'בלגיה',away:'מצרים',kickoffUTC:'2026-06-15T19:00:00Z',ho:1.6,do:3.6,ao:5.5},{id:'m15',g:'H',home:'ערב הסעודית',away:'אורוגוואי',kickoffUTC:'2026-06-15T22:00:00Z',ho:1.2,do:7.5,ao:18.0},{id:'m16',g:'G',home:'איראן',away:'ניו זילנד',kickoffUTC:'2026-06-16T01:00:00Z',ho:3.8,do:3.3,ao:2.0},{id:'m17',g:'I',home:'צרפת',away:'סנגל',kickoffUTC:'2026-06-16T19:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m18',g:'I',home:'עיראק',away:'נורווגיה',kickoffUTC:'2026-06-16T22:00:00Z',ho:5.5,do:3.8,ao:1.6},{id:'m19',g:'J',home:'ארגנטינה',away:"אלג'יריה",kickoffUTC:'2026-06-17T01:00:00Z',ho:1.5,do:4.2,ao:6.5},{id:'m20',g:'J',home:'אוסטריה',away:'ירדן',kickoffUTC:'2026-06-17T04:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m21',g:'K',home:'פורטוגל',away:'קונגו',kickoffUTC:'2026-06-17T17:00:00Z',ho:1.4,do:5.0,ao:8.0},{id:'m22',g:'L',home:'אנגליה',away:'קרואטיה',kickoffUTC:'2026-06-17T20:00:00Z',ho:1.9,do:3.4,ao:4.0},{id:'m23',g:'L',home:'גאנה',away:'פנמה',kickoffUTC:'2026-06-17T23:00:00Z',ho:2.2,do:3.2,ao:3.3},{id:'m24',g:'K',home:'אוזבקיסטן',away:'קולומביה',kickoffUTC:'2026-06-18T02:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m25',g:'A',home:"צ'כיה",away:'דרום אפריקה',kickoffUTC:'2026-06-18T16:00:00Z',ho:1.7,do:3.4,ao:5.0},{id:'m26',g:'B',home:'שוויץ',away:'בוסניה והרצגובינה',kickoffUTC:'2026-06-18T19:00:00Z',ho:2.0,do:3.2,ao:3.7},{id:'m27',g:'B',home:'קנדה',away:'קטאר',kickoffUTC:'2026-06-18T22:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m28',g:'A',home:'מקסיקו',away:'דרום קוריאה',kickoffUTC:'2026-06-19T01:00:00Z',ho:2.4,do:3.1,ao:3.0},{id:'m29',g:'D',home:'טורקיה',away:'פראגוואי',kickoffUTC:'2026-06-19T04:00:00Z',ho:2.8,do:3.1,ao:2.6},{id:'m30',g:'D',home:'ארהב',away:'אוסטרליה',kickoffUTC:'2026-06-19T19:00:00Z',ho:2.1,do:3.3,ao:3.4},{id:'m31',g:'C',home:'סקוטלנד',away:'מרוקו',kickoffUTC:'2026-06-19T22:00:00Z',ho:1.9,do:3.2,ao:4.0},{id:'m32',g:'C',home:'ברזיל',away:'האיטי',kickoffUTC:'2026-06-20T00:30:00Z',ho:1.2,do:7.0,ao:15.0},{id:'m33',g:'F',home:'הולנד',away:'שוודיה',kickoffUTC:'2026-06-20T17:00:00Z',ho:1.8,do:3.3,ao:4.3},{id:'m34',g:'E',home:'גרמניה',away:'חוף השנהב',kickoffUTC:'2026-06-20T20:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m35',g:'E',home:'אקוודור',away:'קוראסאו',kickoffUTC:'2026-06-21T00:00:00Z',ho:6.0,do:3.8,ao:1.5},{id:'m36',g:'F',home:'תוניסיה',away:'יפן',kickoffUTC:'2026-06-21T02:00:00Z',ho:2.0,do:3.3,ao:3.7},{id:'m37',g:'H',home:'ספרד',away:'ערב הסעודית',kickoffUTC:'2026-06-21T16:00:00Z',ho:1.4,do:5.0,ao:8.5},{id:'m38',g:'G',home:'בלגיה',away:'איראן',kickoffUTC:'2026-06-21T19:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m39',g:'H',home:'אורוגוואי',away:'קייפ ורדה',kickoffUTC:'2026-06-21T22:00:00Z',ho:1.4,do:4.0,ao:6.5},{id:'m40',g:'G',home:'ניו זילנד',away:'מצרים',kickoffUTC:'2026-06-22T01:00:00Z',ho:1.7,do:3.5,ao:5.2},{id:'m41',g:'J',home:'ארגנטינה',away:'אוסטריה',kickoffUTC:'2026-06-22T17:00:00Z',ho:1.7,do:3.6,ao:5.2},{id:'m42',g:'I',home:'צרפת',away:'עיראק',kickoffUTC:'2026-06-22T21:00:00Z',ho:1.2,do:7.5,ao:18.0},{id:'m43',g:'I',home:'נורווגיה',away:'סנגל',kickoffUTC:'2026-06-23T00:00:00Z',ho:3.5,do:3.2,ao:2.1},{id:'m44',g:'J',home:'ירדן',away:"אלג'יריה",kickoffUTC:'2026-06-23T03:00:00Z',ho:2.0,do:3.3,ao:3.8},{id:'m45',g:'K',home:'פורטוגל',away:'אוזבקיסטן',kickoffUTC:'2026-06-23T17:00:00Z',ho:1.3,do:6.0,ao:11.0},{id:'m46',g:'L',home:'אנגליה',away:'גאנה',kickoffUTC:'2026-06-23T20:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m47',g:'L',home:'פנמה',away:'קרואטיה',kickoffUTC:'2026-06-23T23:00:00Z',ho:1.7,do:3.5,ao:5.0},{id:'m48',g:'K',home:'קולומביה',away:'קונגו',kickoffUTC:'2026-06-24T02:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m49',g:'B',home:'שוויץ',away:'קנדה',kickoffUTC:'2026-06-24T19:00:00Z',ho:3.2,do:3.2,ao:2.3},{id:'m50',g:'B',home:'בוסניה והרצגובינה',away:'קטאר',kickoffUTC:'2026-06-24T19:00:00Z',ho:1.9,do:3.3,ao:3.9},{id:'m51',g:'C',home:'סקוטלנד',away:'ברזיל',kickoffUTC:'2026-06-24T22:00:00Z',ho:1.4,do:4.8,ao:7.0},{id:'m52',g:'C',home:'מרוקו',away:'האיטי',kickoffUTC:'2026-06-24T22:00:00Z',ho:1.5,do:4.0,ao:6.5},{id:'m53',g:'A',home:"צ'כיה",away:'מקסיקו',kickoffUTC:'2026-06-25T01:00:00Z',ho:2.0,do:3.2,ao:3.8},{id:'m54',g:'A',home:'דרום אפריקה',away:'דרום קוריאה',kickoffUTC:'2026-06-25T01:00:00Z',ho:1.9,do:3.3,ao:4.0},{id:'m55',g:'E',home:'קוראסאו',away:'חוף השנהב',kickoffUTC:'2026-06-25T20:00:00Z',ho:1.4,do:4.5,ao:8.0},{id:'m56',g:'E',home:'אקוודור',away:'גרמניה',kickoffUTC:'2026-06-25T20:00:00Z',ho:6.0,do:3.8,ao:1.5},{id:'m57',g:'F',home:'יפן',away:'שוודיה',kickoffUTC:'2026-06-25T23:00:00Z',ho:2.2,do:3.2,ao:3.2},{id:'m58',g:'F',home:'תוניסיה',away:'הולנד',kickoffUTC:'2026-06-25T23:00:00Z',ho:1.6,do:3.7,ao:5.5},{id:'m59',g:'D',home:'טורקיה',away:'ארהב',kickoffUTC:'2026-06-26T02:00:00Z',ho:2.0,do:3.3,ao:3.6},{id:'m60',g:'D',home:'פראגוואי',away:'אוסטרליה',kickoffUTC:'2026-06-26T02:00:00Z',ho:2.6,do:3.1,ao:2.8},{id:'m61',g:'I',home:'נורווגיה',away:'צרפת',kickoffUTC:'2026-06-26T19:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m62',g:'I',home:'סנגל',away:'עיראק',kickoffUTC:'2026-06-26T19:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m63',g:'H',home:'קייפ ורדה',away:'ערב הסעודית',kickoffUTC:'2026-06-27T00:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m64',g:'H',home:'אורוגוואי',away:'ספרד',kickoffUTC:'2026-06-27T00:00:00Z',ho:1.6,do:3.7,ao:5.5},{id:'m65',g:'G',home:'מצרים',away:'איראן',kickoffUTC:'2026-06-27T03:00:00Z',ho:2.5,do:3.1,ao:2.9},{id:'m66',g:'G',home:'ניו זילנד',away:'בלגיה',kickoffUTC:'2026-06-27T03:00:00Z',ho:1.3,do:6.0,ao:10.0},{id:'m67',g:'J',home:'ירדן',away:'ארגנטינה',kickoffUTC:'2026-06-27T19:00:00Z',ho:1.3,do:6.5,ao:12.0},{id:'m68',g:'J',home:"אלג'יריה",away:'אוסטריה',kickoffUTC:'2026-06-27T19:00:00Z',ho:3.2,do:3.2,ao:2.3},{id:'m69',g:'K',home:'קונגו',away:'פורטוגל',kickoffUTC:'2026-06-27T23:00:00Z',ho:1.4,do:5.0,ao:8.0},{id:'m70',g:'K',home:'קולומביה',away:'אוזבקיסטן',kickoffUTC:'2026-06-27T23:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m71',g:'L',home:'קרואטיה',away:'אנגליה',kickoffUTC:'2026-06-27T19:00:00Z',ho:1.9,do:3.4,ao:4.0},{id:'m72',g:'L',home:'פנמה',away:'גאנה',kickoffUTC:'2026-06-27T19:00:00Z',ho:3.8,do:3.3,ao:2.0}];
+const MATCHES=[{id:'m1',g:'A',home:'מקסיקו',away:'דרום אפריקה',kickoffUTC:'2026-06-11T19:00:00Z',ho:1.8,do:3.5,ao:4.2},{id:'m2',g:'A',home:'דרום קוריאה',away:"צ'כיה",kickoffUTC:'2026-06-12T02:00:00Z',ho:2.1,do:3.2,ao:3.5},{id:'m3',g:'B',home:'קנדה',away:'בוסניה והרצגובינה',kickoffUTC:'2026-06-12T19:00:00Z',ho:2.0,do:3.3,ao:3.6},{id:'m4',g:'D',home:'ארהב',away:'פראגוואי',kickoffUTC:'2026-06-13T01:00:00Z',ho:2.0,do:3.2,ao:3.7},{id:'m5',g:'B',home:'קטאר',away:'שוויץ',kickoffUTC:'2026-06-13T19:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m6',g:'C',home:'ברזיל',away:'מרוקו',kickoffUTC:'2026-06-13T22:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m7',g:'C',home:'האיטי',away:'סקוטלנד',kickoffUTC:'2026-06-14T01:00:00Z',ho:4.2,do:3.3,ao:1.9},{id:'m8',g:'D',home:'אוסטרליה',away:'טורקיה',kickoffUTC:'2026-06-14T04:00:00Z',ho:2.5,do:3.1,ao:2.9},{id:'m9',g:'E',home:'גרמניה',away:'קוראסאו',kickoffUTC:'2026-06-14T17:00:00Z',ho:1.1,do:9.0,ao:22.0},{id:'m10',g:'F',home:'הולנד',away:'יפן',kickoffUTC:'2026-06-14T20:00:00Z',ho:1.9,do:3.4,ao:4.0},{id:'m11',g:'E',home:'חוף השנהב',away:'אקוודור',kickoffUTC:'2026-06-14T23:00:00Z',ho:2.3,do:3.2,ao:3.1},{id:'m12',g:'F',home:'שוודיה',away:'תוניסיה',kickoffUTC:'2026-06-15T02:00:00Z',ho:1.8,do:3.4,ao:4.2},{id:'m13',g:'G',home:'בלגיה',away:'מצרים',kickoffUTC:'2026-06-15T19:00:00Z',ho:1.8,do:3.5,ao:4.5},{id:'m14',g:'G',home:'איראן',away:'ניו זילנד',kickoffUTC:'2026-06-16T01:00:00Z',ho:1.6,do:3.6,ao:5.5},{id:'m15',g:'H',home:'ספרד',away:'קייפ ורדה',kickoffUTC:'2026-06-15T16:00:00Z',ho:1.2,do:7.5,ao:18.0},{id:'m16',g:'H',home:'ערב הסעודית',away:'אורוגוואי',kickoffUTC:'2026-06-15T22:00:00Z',ho:3.8,do:3.3,ao:2.0},{id:'m17',g:'I',home:'צרפת',away:'סנגל',kickoffUTC:'2026-06-16T19:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m18',g:'I',home:'עיראק',away:'נורווגיה',kickoffUTC:'2026-06-16T22:00:00Z',ho:5.5,do:3.8,ao:1.6},{id:'m19',g:'J',home:'ארגנטינה',away:"אלג'יריה",kickoffUTC:'2026-06-17T01:00:00Z',ho:1.5,do:4.2,ao:6.5},{id:'m20',g:'J',home:'אוסטריה',away:'ירדן',kickoffUTC:'2026-06-17T04:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m21',g:'K',home:'פורטוגל',away:'קונגו',kickoffUTC:'2026-06-17T17:00:00Z',ho:1.4,do:5.0,ao:8.0},{id:'m22',g:'K',home:'אוזבקיסטן',away:'קולומביה',kickoffUTC:'2026-06-18T02:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m23',g:'L',home:'אנגליה',away:'קרואטיה',kickoffUTC:'2026-06-17T20:00:00Z',ho:1.9,do:3.4,ao:4.0},{id:'m24',g:'L',home:'גאנה',away:'פנמה',kickoffUTC:'2026-06-17T23:00:00Z',ho:2.2,do:3.2,ao:3.3},{id:'m25',g:'A',home:'מקסיקו',away:'דרום קוריאה',kickoffUTC:'2026-06-19T01:00:00Z',ho:2.4,do:3.1,ao:3.0},{id:'m26',g:'A',home:"צ'כיה",away:'דרום אפריקה',kickoffUTC:'2026-06-18T16:00:00Z',ho:1.7,do:3.4,ao:5.0},{id:'m27',g:'B',home:'קנדה',away:'שוויץ',kickoffUTC:'2026-06-18T22:00:00Z',ho:3.2,do:3.2,ao:2.3},{id:'m28',g:'B',home:'בוסניה והרצגובינה',away:'קטאר',kickoffUTC:'2026-06-18T19:00:00Z',ho:1.9,do:3.3,ao:3.9},{id:'m29',g:'H',home:'ספרד',away:'ערב הסעודית',kickoffUTC:'2026-06-21T16:00:00Z',ho:1.4,do:5.0,ao:8.5},{id:'m30',g:'H',home:'קייפ ורדה',away:'אורוגוואי',kickoffUTC:'2026-06-21T22:00:00Z',ho:6.5,do:4.0,ao:1.4},{id:'m31',g:'C',home:'ברזיל',away:'האיטי',kickoffUTC:'2026-06-20T00:30:00Z',ho:1.2,do:7.0,ao:15.0},{id:'m32',g:'C',home:'מרוקו',away:'סקוטלנד',kickoffUTC:'2026-06-19T22:00:00Z',ho:1.9,do:3.2,ao:4.0},{id:'m33',g:'D',home:'ארהב',away:'אוסטרליה',kickoffUTC:'2026-06-19T19:00:00Z',ho:2.1,do:3.3,ao:3.4},{id:'m34',g:'D',home:'פראגוואי',away:'טורקיה',kickoffUTC:'2026-06-19T04:00:00Z',ho:2.8,do:3.1,ao:2.6},{id:'m35',g:'F',home:'הולנד',away:'שוודיה',kickoffUTC:'2026-06-20T17:00:00Z',ho:1.8,do:3.3,ao:4.3},{id:'m36',g:'F',home:'יפן',away:'תוניסיה',kickoffUTC:'2026-06-21T02:00:00Z',ho:2.0,do:3.3,ao:3.7},{id:'m37',g:'E',home:'גרמניה',away:'חוף השנהב',kickoffUTC:'2026-06-20T20:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m38',g:'E',home:'קוראסאו',away:'אקוודור',kickoffUTC:'2026-06-21T00:00:00Z',ho:6.0,do:3.8,ao:1.5},{id:'m39',g:'L',home:'אנגליה',away:'גאנה',kickoffUTC:'2026-06-23T20:00:00Z',ho:1.6,do:3.8,ao:5.5},{id:'m40',g:'L',home:'קרואטיה',away:'פנמה',kickoffUTC:'2026-06-23T23:00:00Z',ho:1.7,do:3.5,ao:5.0},{id:'m41',g:'G',home:'בלגיה',away:'ניו זילנד',kickoffUTC:'2026-06-21T19:00:00Z',ho:1.3,do:6.0,ao:10.0},{id:'m42',g:'G',home:'מצרים',away:'איראן',kickoffUTC:'2026-06-22T01:00:00Z',ho:2.5,do:3.1,ao:2.9},{id:'m43',g:'I',home:'צרפת',away:'עיראק',kickoffUTC:'2026-06-22T21:00:00Z',ho:1.2,do:7.5,ao:18.0},{id:'m44',g:'I',home:'סנגל',away:'נורווגיה',kickoffUTC:'2026-06-23T00:00:00Z',ho:3.5,do:3.2,ao:2.1},{id:'m45',g:'J',home:'ארגנטינה',away:'אוסטריה',kickoffUTC:'2026-06-22T17:00:00Z',ho:1.7,do:3.6,ao:5.2},{id:'m46',g:'J',home:"אלג'יריה",away:'ירדן',kickoffUTC:'2026-06-23T03:00:00Z',ho:2.0,do:3.3,ao:3.8},{id:'m47',g:'K',home:'פורטוגל',away:'קולומביה',kickoffUTC:'2026-06-23T17:00:00Z',ho:1.8,do:3.5,ao:4.5},{id:'m48',g:'K',home:'קונגו',away:'אוזבקיסטן',kickoffUTC:'2026-06-24T02:00:00Z',ho:2.0,do:3.3,ao:3.7},{id:'m49',g:'A',home:'מקסיקו',away:"צ'כיה",kickoffUTC:'2026-06-25T01:00:00Z',ho:2.0,do:3.2,ao:3.8},{id:'m50',g:'A',home:'דרום קוריאה',away:'דרום אפריקה',kickoffUTC:'2026-06-25T01:00:00Z',ho:1.9,do:3.3,ao:4.0},{id:'m51',g:'B',home:'קנדה',away:'קטאר',kickoffUTC:'2026-06-18T22:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m52',g:'B',home:'שוויץ',away:'בוסניה והרצגובינה',kickoffUTC:'2026-06-24T19:00:00Z',ho:2.0,do:3.2,ao:3.7},{id:'m53',g:'C',home:'ברזיל',away:'סקוטלנד',kickoffUTC:'2026-06-24T22:00:00Z',ho:1.4,do:4.8,ao:7.0},{id:'m54',g:'C',home:'מרוקו',away:'האיטי',kickoffUTC:'2026-06-24T22:00:00Z',ho:1.5,do:4.0,ao:6.5},{id:'m55',g:'D',home:'ארהב',away:'טורקיה',kickoffUTC:'2026-06-26T02:00:00Z',ho:2.0,do:3.3,ao:3.6},{id:'m56',g:'D',home:'פראגוואי',away:'אוסטרליה',kickoffUTC:'2026-06-26T02:00:00Z',ho:2.6,do:3.1,ao:2.8},{id:'m57',g:'E',home:'גרמניה',away:'אקוודור',kickoffUTC:'2026-06-25T20:00:00Z',ho:1.6,do:3.7,ao:5.5},{id:'m58',g:'E',home:'חוף השנהב',away:'קוראסאו',kickoffUTC:'2026-06-25T20:00:00Z',ho:1.4,do:4.5,ao:8.0},{id:'m59',g:'F',home:'הולנד',away:'תוניסיה',kickoffUTC:'2026-06-25T23:00:00Z',ho:1.6,do:3.7,ao:5.5},{id:'m60',g:'F',home:'יפן',away:'שוודיה',kickoffUTC:'2026-06-25T23:00:00Z',ho:2.2,do:3.2,ao:3.2},{id:'m61',g:'G',home:'בלגיה',away:'איראן',kickoffUTC:'2026-06-27T03:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m62',g:'G',home:'מצרים',away:'ניו זילנד',kickoffUTC:'2026-06-27T03:00:00Z',ho:1.7,do:3.5,ao:5.2},{id:'m63',g:'H',home:'ספרד',away:'אורוגוואי',kickoffUTC:'2026-06-27T00:00:00Z',ho:1.6,do:3.7,ao:5.5},{id:'m64',g:'H',home:'קייפ ורדה',away:'ערב הסעודית',kickoffUTC:'2026-06-27T00:00:00Z',ho:4.5,do:3.5,ao:1.8},{id:'m65',g:'I',home:'צרפת',away:'נורווגיה',kickoffUTC:'2026-06-26T19:00:00Z',ho:1.7,do:3.6,ao:5.0},{id:'m66',g:'I',home:'סנגל',away:'עיראק',kickoffUTC:'2026-06-26T19:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m67',g:'J',home:'ארגנטינה',away:'ירדן',kickoffUTC:'2026-06-27T19:00:00Z',ho:1.3,do:6.5,ao:12.0},{id:'m68',g:'J',home:"אלג'יריה",away:'אוסטריה',kickoffUTC:'2026-06-27T19:00:00Z',ho:3.2,do:3.2,ao:2.3},{id:'m69',g:'K',home:'פורטוגל',away:'אוזבקיסטן',kickoffUTC:'2026-06-27T23:00:00Z',ho:1.3,do:6.0,ao:11.0},{id:'m70',g:'K',home:'קולומביה',away:'קונגו',kickoffUTC:'2026-06-27T23:00:00Z',ho:1.8,do:3.4,ao:4.5},{id:'m71',g:'L',home:'אנגליה',away:'פנמה',kickoffUTC:'2026-06-27T19:00:00Z',ho:1.5,do:4.5,ao:7.0},{id:'m72',g:'L',home:'גאנה',away:'קרואטיה',kickoffUTC:'2026-06-27T19:00:00Z',ho:3.8,do:3.3,ao:2.0}];
 
 const CHAMPS=[{n:'ספרד',f:'🇪🇸',o:'+475'},{n:'צרפת',f:'🇫🇷',o:'+550'},{n:'אנגליה',f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',o:'+650'},{n:'ברזיל',f:'🇧🇷',o:'+750'},{n:'ארגנטינה',f:'🇦🇷',o:'+900'},{n:'פורטוגל',f:'🇵🇹',o:'+1000'},{n:'גרמניה',f:'🇩🇪',o:'+1400'},{n:'הולנד',f:'🇳🇱',o:'+2000'},{n:'קולומביה',f:'🇨🇴',o:'+2500'},{n:'מקסיקו',f:'🇲🇽',o:'+3000'},{n:'אורוגוואי',f:'🇺🇾',o:'+3000'},{n:'בלגיה',f:'🇧🇪',o:'+3500'},{n:'מרוקו',f:'🇲🇦',o:'+4000'},{n:'ארהב',f:'🇺🇸',o:'+5000'},{n:'קנדה',f:'🇨🇦',o:'+5000'},{n:'יפן',f:'🇯🇵',o:'+6000'},{n:'קרואטיה',f:'🇭🇷',o:'+6000'},{n:'שוויץ',f:'🇨🇭',o:'+8000'},{n:'סנגל',f:'🇸🇳',o:'+8000'},{n:'דרום קוריאה',f:'🇰🇷',o:'+10000'},{n:'אוסטרליה',f:'🇦🇺',o:'+10000'},{n:'נורווגיה',f:'🇳🇴',o:'+10000'},{n:'טורקיה',f:'🇹🇷',o:'+12000'},{n:'אקוודור',f:'🇪🇨',o:'+15000'},{n:'גאנה',f:'🇬🇭',o:'+15000'},{n:"חוף השנהב",f:'🇨🇮',o:'+15000'},{n:'שוודיה',f:'🇸🇪',o:'+15000'},{n:'ערב הסעודית',f:'🇸🇦',o:'+20000'},{n:'מצרים',f:'🇪🇬',o:'+20000'},{n:'פראגוואי',f:'🇵🇾',o:'+20000'},{n:'אוסטריה',f:'🇦🇹',o:'+20000'},{n:'איראן',f:'🇮🇷',o:'+25000'},{n:'תוניסיה',f:'🇹🇳',o:'+25000'},{n:"צ'כיה",f:'🇨🇿',o:'+25000'},{n:'סקוטלנד',f:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',o:'+30000'},{n:'בוסניה והרצגובינה',f:'🇧🇦',o:'+30000'},{n:'קונגו',f:'🇨🇩',o:'+30000'},{n:"אלג'יריה",f:'🇩🇿',o:'+30000'},{n:'דרום אפריקה',f:'🇿🇦',o:'+40000'},{n:'פנמה',f:'🇵🇦',o:'+40000'},{n:'עיראק',f:'🇮🇶',o:'+40000'},{n:'ירדן',f:'🇯🇴',o:'+50000'},{n:'אוזבקיסטן',f:'🇺🇿',o:'+50000'},{n:'ניו זילנד',f:'🇳🇿',o:'+50000'},{n:'האיטי',f:'🇭🇹',o:'+75000'},{n:'קייפ ורדה',f:'🇨🇻',o:'+75000'},{n:'קטאר',f:'🇶🇦',o:'+75000'},{n:'קוראסאו',f:'🇨🇼',o:'+100000'}];
 
@@ -360,7 +370,7 @@ var hideOldMatches=true;
 function isSpecialLocked(){return new Date()>=new Date('2026-06-15T19:00:00Z');}
 function toIsraelTime(u){var d=new Date(u),il=new Date(d.getTime()+IL_OFFSET*3600000),days=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];return 'יום '+days[il.getUTCDay()]+' '+String(il.getUTCDate()).padStart(2,'0')+'.'+String(il.getUTCMonth()+1).padStart(2,'0')+' | '+String(il.getUTCHours()).padStart(2,'0')+':'+String(il.getUTCMinutes()).padStart(2,'0');}
 
-var userName='',userKey='',myBets={},mySpecial={},allPlayers={},curGroup='all',fbReady=false,unsubLb=null,prevPositions={};
+var userName='',userKey='',myBets={},mySpecial={},allPlayers={},curGroup='all',fbReady=false,unsubLb=null,prevPositions={},matchResults={};
 function safeKey(n){return n.replace(/[.#$\/\[\]]/g,'_').slice(0,20);}
 function fb(){return window._fb;}
 
@@ -376,7 +386,7 @@ window.onload=function(){
     userName=sn;userKey=sk;
     document.getElementById('hName').textContent=userName;
     document.getElementById('authModal').style.display='none';
-    function doLogin(){loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();}
+    function doLogin(){loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();listenResults();}
     if(fbReady){doLogin();}else{document.addEventListener('fbReady',doLogin,{once:true});}
   }else{document.getElementById('authModal').style.display='flex';}
 };
@@ -396,7 +406,7 @@ async function doAuth(){
   }catch(e){errEl.textContent='❌ '+e.message;document.getElementById('authBtn').textContent=authMode==='login'?'כניסה 🚀':'הרשמה 🎉';}
 }
 
-function loginSuccess(n,k){userName=n;userKey=k;localStorage.setItem('wc26_name',n);localStorage.setItem('wc26_key',k);document.getElementById('hName').textContent=n;document.getElementById('authModal').style.display='none';loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();showToast('ברוך הבא '+n+'! 🎉');}
+function loginSuccess(n,k){userName=n;userKey=k;localStorage.setItem('wc26_name',n);localStorage.setItem('wc26_key',k);document.getElementById('hName').textContent=n;document.getElementById('authModal').style.display='none';loadMyData();if(!unsubLb)listenLeaderboard();updatePlayerCount();listenResults();showToast('ברוך הבא '+n+'! 🎉');}
 function logout(){if(!confirm('להתנתק?'))return;localStorage.removeItem('wc26_name');localStorage.removeItem('wc26_key');userName='';userKey='';myBets={};mySpecial={};document.getElementById('hName').textContent='אורח';document.getElementById('hPts').textContent='0';document.getElementById('betCount').textContent='0';document.getElementById('authName').value='';document.getElementById('authPass').value='';document.getElementById('authError').textContent='';document.getElementById('authModal').style.display='flex';showToast('התנתקת 👋');}
 
 async function loadMyData(){if(!fbReady||!userKey)return;var F=fb();try{var snap=await F.get(F.ref(F.db,'players/'+userKey));if(snap.exists()){var d=snap.val();myBets=d.bets||{};mySpecial=d.special||{};document.getElementById('hPts').textContent=(d.info&&d.info.pts)||0;buildMatches();restoreSpecial();updateBetCount();}}catch(e){}}
@@ -477,8 +487,28 @@ function buildMatches(){
     var boxes=mkBox('t1_'+m.id,t1bg,t1bc,t1c,t1m,m.home,m.ho)+mkBox('tx_'+m.id,txbg,txbc,txc,txm,'תיקו',m.do)+mkBox('t2_'+m.id,t2bg,t2bc,t2c,t2m,m.away,m.ao);
     var savedInd=betR?'<div style="text-align:center;padding:0 14px 10px;font-size:12px;color:#4ade80;font-weight:600" id="ind_'+m.id+'">✓ נשמר</div>':'<div style="text-align:center;padding:0 14px 10px;font-size:12px;color:var(--muted)" id="ind_'+m.id+'"></div>';
     var live=isLive(m);
+    var res=matchResults[m.id];
+    var resultCenter='';
+    var ptsBadge='';
+    if(res&&res.h!==undefined){
+      resultCenter='<span style="background:var(--gold);color:var(--darker);border-radius:4px;padding:2px 12px;font-weight:900;font-size:13px;position:absolute;left:50%;transform:translateX(-50%)">'+m.home+' '+res.h+' - '+res.a+' '+m.away+'</span>';
+      // חשב ניקוד לניחוש של המשתמש
+      if(betR){
+        var rR=res.h>res.a?'1':res.h<res.a?'2':'X';
+        var rD=Math.abs(res.h-res.a);
+        var bH=parseInt(sh)||0,bA=parseInt(sa)||0,bD=Math.abs(bH-bA);
+        var icon='',pts=0,col='';
+        if(betR===rR){
+          if(bH===res.h&&bA===res.a){icon='🥇';pts=5;col='#FFD700';}
+          else if(rR==='X'){icon='🤡';pts=0;col='#ff6b6b';}
+          else if(bD===rD){icon='🥈';pts=3;col='#C0C0C0';}
+          else{icon='🥉';pts=1;col='#CD7F32';}
+        }else{icon='🤡';pts=0;col='#ff6b6b';}
+        ptsBadge='<span style="background:rgba(0,0,0,0.35);color:'+col+';border-radius:4px;padding:2px 9px;font-weight:700;font-size:12px;white-space:nowrap;margin-left:8px">'+icon+' '+pts+'</span>';
+      }
+    }
     var headBadge=live?'<span class="live-badge"><span class="live-dot"></span>משוחק עכשיו</span>':(locked?'<span class="lock-badge">🔒 ננעל</span>':'<span class="gbadge">בית '+m.g+'</span>');
-    return '<div class="mc '+(locked?'locked ':'')+(live?'live':'')+'"><div class="mc-head"><span>🕐 '+toIsraelTime(m.kickoffUTC)+' (ישראל)</span>'+headBadge+'</div>'
+    return '<div class="mc '+(locked?'locked ':'')+(live?'live':'')+'"><div class="mc-head" style="position:relative"><span>🕐 '+toIsraelTime(m.kickoffUTC)+' (ישראל)</span>'+resultCenter+'<span style="display:flex;align-items:center">'+ptsBadge+headBadge+'</span></div>'
       +'<div class="mc-body"><div class="team"><div class="flag">'+hf+'</div><div class="tname">'+m.home+'</div><div style="font-size:10px;color:var(--muted)">'+(ABBREV[m.home]||'')+'</div></div>'
       +'<div class="mc-center"><div class="vs">נגד</div></div>'
       +'<div class="team"><div class="flag">'+af+'</div><div class="tname">'+m.away+'</div><div style="font-size:10px;color:var(--muted)">'+(ABBREV[m.away]||'')+'</div></div></div>'
@@ -486,7 +516,9 @@ function buildMatches(){
       +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:4px 14px 8px">'+boxes+'</div>'
       +'<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px 12px">'
       +'<span style="font-size:12px;color:var(--muted)">תוצאה מדויקת:</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--gold)">'+m.home+'</span>'
       +'<div class="sinp-wrap"><input type="number" class="sinp" min="0" max="20" value="'+sh+'" placeholder="0" id="sh_'+m.id+'" oninput="updScore(\''+m.id+'\')" '+dis+'><span class="ssep">:</span><input type="number" class="sinp" min="0" max="20" value="'+sa+'" placeholder="0" id="sa_'+m.id+'" oninput="updScore(\''+m.id+'\')" '+dis+'></div>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--gold)">'+m.away+'</span>'
       +'</div>'+savedInd+'</div></div>';
   }).join('');
 }
@@ -500,6 +532,7 @@ async function selScorer(i,el){if(isSpecialLocked()){showToast('🔒 הניחו�
 function restoreSpecial(){if(mySpecial.champion!==undefined){var el=document.querySelector('#champGrid .cc:nth-child('+(mySpecial.champion+1)+')');if(el)el.classList.add('sel');}if(mySpecial.scorer!==undefined){var el2=document.querySelector('#scorerGrid .sc:nth-child('+(mySpecial.scorer+1)+')');if(el2)el2.classList.add('sel');}}
 
 function listenLeaderboard(){if(!fbReady)return;var F=fb();unsubLb=F.onValue(F.ref(F.db,'players'),function(snap){if(!snap.exists())return;allPlayers=snap.val();renderLeaderboard();updatePlayerCount();loadSpyUsers();});}
+function listenResults(){if(!fbReady)return;var F=fb();F.onValue(F.ref(F.db,'results'),function(snap){matchResults=snap.exists()?snap.val():{};buildMatches();});}
 
 async function recalcAllScores(){
   if(!fbReady)return;var F=fb();
@@ -707,7 +740,86 @@ function buildHistory(){
   }).catch(function(){box.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px">שגיאה</div>';});
 }
 
+async function auditMatchMapping(){
+  var box=document.getElementById('rawBetsContent');
+  if(!fbReady){box.innerHTML='אין חיבור';return;}
+  box.innerHTML='⏳ סורק את כל הניחושים...';
+  var F=fb();
+  try{
+    var snap=await F.get(F.ref(F.db,'players'));
+    if(!snap.exists()){box.innerHTML='אין שחקנים';return;}
+    var players=snap.val();
+    // לכל ID, אסוף את שם המשחק ששמור בניחושים
+    var idToMatch={};
+    Object.values(players).forEach(function(p){
+      var bets=p.bets||{};
+      Object.entries(bets).forEach(function(e){
+        var mid=e[0],bet=e[1];
+        if(bet.match){
+          if(!idToMatch[mid])idToMatch[mid]={};
+          idToMatch[mid][bet.match]=(idToMatch[mid][bet.match]||0)+1;
+        }
+      });
+    });
+    // השווה מול הקוד הנוכחי
+    var rows=[];
+    MATCHES.forEach(function(m){
+      var saved=idToMatch[m.id];
+      var codeMatch=m.home+' נגד '+m.away;
+      if(saved){
+        var savedNames=Object.keys(saved);
+        var match=savedNames.indexOf(codeMatch)>=0;
+        var col=match?'#4ade80':'#ff6b6b';
+        var icon=match?'✅':'⚠️';
+        rows.push('<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);direction:rtl"><b style="color:'+col+'">'+icon+' '+m.id+'</b><br><span style="font-size:12px">בקוד: '+codeMatch+'</span><br><span style="font-size:12px;color:var(--muted)">בניחושים: '+savedNames.join(', ')+'</span></div>');
+      }
+    });
+    box.innerHTML='<div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:8px">בדיקת התאמה: קוד מול ניחושים שמורים</div>'+rows.join('')+'<div style="margin-top:10px;padding:10px;background:rgba(255,200,0,0.1);border-radius:8px;font-size:11px;direction:ltr;text-align:left;font-family:monospace;color:#888;word-break:break-all">'+JSON.stringify(idToMatch)+'</div>';
+  }catch(e){box.innerHTML='שגיאה: '+e.message;}
+}
+
+async function showRawBets(){
+  var key=document.getElementById('rawBetPlayer').value;
+  var box=document.getElementById('rawBetsContent');
+  if(!key){box.innerHTML='<div style="color:var(--muted)">בחר שחקן</div>';return;}
+  if(!fbReady){box.innerHTML='<div style="color:#ff6b6b">אין חיבור</div>';return;}
+  box.innerHTML='⏳ טוען...';
+  var F=fb();
+  try{
+    var snap=await F.get(F.ref(F.db,'players/'+key));
+    var resSnap=await F.get(F.ref(F.db,'results'));
+    var results=resSnap.exists()?resSnap.val():{};
+    if(!snap.exists()){box.innerHTML='אין נתונים';return;}
+    var data=snap.val();var bets=data.bets||{};
+    var rows=MATCHES.map(function(m){
+      var bet=bets[m.id];if(!bet)return null;
+      var betR=bet.r||'';
+      if(!betR&&bet.result){if(bet.result===m.home)betR='1';else if(bet.result===m.away)betR='2';else betR='X';}
+      var pick=betR==='1'?m.home:betR==='2'?m.away:'תיקו';
+      var sh=bet.sh!==undefined?bet.sh:'?';
+      var sa=bet.sa!==undefined?bet.sa:'?';
+      var res=results[m.id];
+      var resTxt=res?(' | תוצאה: '+m.home+' '+res.h+'-'+res.a+' '+m.away):'';
+      var rawJson=JSON.stringify(bet);
+      var tsStr=bet.ts?new Date(bet.ts).toLocaleString('he-IL'):'ללא חותמת זמן (ניחוש ישן)';
+      return '<div style="padding:10px;border-bottom:1px solid rgba(255,255,255,0.05)">'
+        +'<b style="color:var(--gold)">'+m.home+' נגד '+m.away+'</b>'
+        +'<div style="margin-top:6px;font-size:13px;color:var(--muted)">ניחוש (sh ליד '+m.home+', sa ליד '+m.away+'):</div>'
+        +'<div style="font-size:14px"><span style="color:#4ade80;font-weight:700">'+sh+'</span> '+m.home+' &nbsp;|&nbsp; <span style="color:#4ade80;font-weight:700">'+sa+'</span> '+m.away+'</div>'
+        +'<div style="font-size:12px;color:var(--muted);margin-top:2px">מנצח שניחש: <b>'+pick+'</b></div>'
+        +(res?('<div style="font-size:14px;margin-top:6px;border-top:1px dashed rgba(255,255,255,0.1);padding-top:6px">תוצאה אמיתית: <span style="color:var(--gold);font-weight:700">'+res.h+'</span> '+m.home+' &nbsp;|&nbsp; <span style="color:var(--gold);font-weight:700">'+res.a+'</span> '+m.away+'</div>'):'')
+        +'<div style="font-size:10px;color:#666;margin-top:4px;direction:ltr;text-align:left;font-family:monospace">'+rawJson+'</div>'
+        +'<div style="font-size:10px;color:#666;direction:ltr;text-align:left">נשמר: '+tsStr+'</div>'
+        +'</div>';
+    }).filter(Boolean);
+    box.innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted)">לא ניחש</div>';
+  }catch(e){box.innerHTML='<div style="color:#ff6b6b">שגיאה: '+e.message+'</div>';}
+}
+
 function populateAdminSelects(){
+  var rp=document.getElementById('rawBetPlayer');
+  if(rp&&allPlayers){rp.innerHTML='<option value="">-- בחר שחקן --</option>'+Object.entries(allPlayers).map(function(e){var k=e[0],v=e[1];return '<option value="'+k+'">'+((v.info&&v.info.name)||k)+'</option>';}).join('');}
+
   var cs=document.getElementById('champWinner'),ss=document.getElementById('scorerWinner');if(!cs||!ss)return;
   cs.innerHTML='<option value="">-- בחר אלוף --</option>'+CHAMPS.map(function(c,i){return '<option value="'+i+'">'+c.n+' — '+c.o+' — '+oddsToPoints(c.o,20)+' נקודות</option>';}).join('');
   ss.innerHTML='<option value="">-- בחר מלך שערים --</option>'+SCORERS.map(function(s,i){return '<option value="'+i+'">'+s.n+' ('+s.t+') — '+s.o+' — '+oddsToPoints(s.o,15)+' נקודות</option>';}).join('');
@@ -743,7 +855,7 @@ async function resetAll(){
 function checkAdminPass(){var v=document.getElementById('adminPassInput').value;if(v===ADMIN_PASS){document.getElementById('adminLock').style.display='none';document.getElementById('adminPanel').style.display='block';}else showToast('❌ סיסמה שגויה',true);}
 
 function buildAdminMatches(){
-  document.getElementById('adminMatches').innerHTML=MATCHES.map(function(m){var hf=flagImg(m.home,24),af=flagImg(m.away,24);return '<div class="admin-card"><div style="font-size:12px;color:var(--muted);margin-bottom:8px">🕐 '+toIsraelTime(m.kickoffUTC)+'</div><div class="admin-match"><div class="admin-name">'+hf+' '+m.home+' נגד '+m.away+' '+af+'</div><div class="admin-score"><input type="number" class="ainp" id="ah_'+m.id+'" min="0" max="20" placeholder="0"><span class="asep">:</span><input type="number" class="ainp" id="aa_'+m.id+'" min="0" max="20" placeholder="0"></div><button class="confirm-btn" id="abtn_'+m.id+'" onclick="confirmResult(\''+m.id+'\')">אשר ✅</button></div></div>';}).join('');
+  document.getElementById('adminMatches').innerHTML=MATCHES.map(function(m){var hf=flagImg(m.home,24),af=flagImg(m.away,24);return '<div class="admin-card"><div style="font-size:12px;color:var(--muted);margin-bottom:8px">🕐 '+toIsraelTime(m.kickoffUTC)+'</div><div class="admin-match"><div class="admin-name">'+hf+' '+m.home+' נגד '+m.away+' '+af+'</div><div class="admin-score"><input type="number" class="ainp" id="ah_'+m.id+'" min="0" max="20" placeholder="0"><span class="asep">:</span><input type="number" class="ainp" id="aa_'+m.id+'" min="0" max="20" placeholder="0"></div><button class="confirm-btn" id="abtn_'+m.id+'" onclick="confirmResult(\''+m.id+'\')">אשר ✅</button><button onclick="deleteResult(\''+m.id+'\')" style="background:#c0392b;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap">🗑️ בטל</button></div></div>';}).join('');
   loadExistingResults();
 }
 
@@ -756,6 +868,23 @@ function loadExistingResults(){
     Object.entries(snap.val()).forEach(function(e){var mid=e[0],res=e[1];var ah=document.getElementById('ah_'+mid),aa=document.getElementById('aa_'+mid),btn=document.getElementById('abtn_'+mid);if(ah&&res.h!==undefined){ah.value=res.h;aa.value=res.a;if(btn){btn.textContent='✓ עודכן';btn.classList.add('done');}}});
     recalcAllScores();
   },{onlyOnce:false});
+}
+
+async function deleteResult(mid){
+  var mo=MATCHES.find(function(m){return m.id===mid;});
+  var name=mo?mo.home+' נגד '+mo.away:mid;
+  if(!confirm('לבטל את התוצאה של '+name+'?'))return;
+  if(!fbReady){showToast('❌ אין חיבור',true);return;}
+  var F=fb();
+  try{
+    await F.remove(F.ref(F.db,'results/'+mid));
+    await recalcAllScores();
+    var ah=document.getElementById('ah_'+mid),aa=document.getElementById('aa_'+mid),btn=document.getElementById('abtn_'+mid);
+    if(ah){ah.value='';aa.value='';}
+    if(btn){btn.textContent='אשר ✅';btn.classList.remove('done');}
+    showToast('🗑️ התוצאה בוטלה');
+    loadTicker();
+  }catch(e){showToast('❌ שגיאה',true);}
 }
 
 async function confirmResult(mid){
